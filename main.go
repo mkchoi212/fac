@@ -13,8 +13,8 @@ import (
 
 var (
 	current       = 0
-	conflictCount = 2
-	conflicts     = [...]string{"index.js: 110", "style.css: 69"}
+	conflictCount = 0
+	conflicts     = []Conflict{}
 )
 
 func layout(g *gocui.Gui) error {
@@ -51,10 +51,17 @@ func selectConflict(i int, v *gocui.View) error {
 	//fmt.Fprintf(v, "2. \033[3%d;%dmstyle.css: 59\033[0m\n", 1, 7)
 
 	for idx, conflict := range conflicts {
-		if idx == i {
-			fmt.Fprintf(v, "%d. %s <-\n", idx+1, conflict)
+		var out string
+		if conflict.Resolved {
+			out = fmt.Sprintf("✅  \033[3%d;%dm%s:%d \033[0m", 2, 1, conflict.FileName, conflict.StartLine)
 		} else {
-			fmt.Fprintf(v, "%d. %s\n", idx+1, conflict)
+			out = fmt.Sprintf("%d. \033[3%d;%dm%s:%d \033[0m", idx+1, 1, 1, conflict.FileName, conflict.StartLine)
+		}
+
+		if idx == i {
+			fmt.Fprintf(v, "%s <-\n", out)
+		} else {
+			fmt.Fprintf(v, "%s\n", out)
 		}
 	}
 	return nil
@@ -78,6 +85,21 @@ func nextConflict(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+func resolveConflict(g *gocui.Gui, v *gocui.View) error {
+
+	g.Update(func(g *gocui.Gui) error {
+		v, err := g.View("panel")
+		if err != nil {
+			return nil
+		}
+		conflicts[current].Resolve()
+		v.Clear()
+		selectConflict(current, v)
+		return nil
+	})
+	return nil
+}
+
 func quit(g *gocui.Gui, v *gocui.View) error {
 	return gocui.ErrQuit
 }
@@ -91,10 +113,21 @@ func keyBindings(g *gocui.Gui) error {
 		return err
 	}
 
+	if err := g.SetKeybinding("", gocui.KeyEnter, gocui.ModNone, resolveConflict); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func main() {
+	var err error
+	conflicts, err = Find()
+	if err != nil {
+		log.Panicln("No conflicts found")
+	}
+	conflictCount = len(conflicts)
+
 	g, err := gocui.NewGui(gocui.OutputNormal)
 	if err != nil {
 		log.Panicln(err)
@@ -110,4 +143,5 @@ func main() {
 	if err := g.MainLoop(); err != nil && err != gocui.ErrQuit {
 		log.Panicln(err)
 	}
+
 }
