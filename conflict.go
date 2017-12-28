@@ -4,12 +4,12 @@ import (
 	"bufio"
 	"bytes"
 	"errors"
+	"fmt"
 	"io"
 	"log"
 	"os"
 	"os/exec"
 	"path"
-	"sort"
 	"strconv"
 	"strings"
 )
@@ -71,18 +71,17 @@ func (c *Conflict) ExtractLines() error {
 		}
 	}
 
-	relMid, relEnd := c.Middle-c.Start, c.End-c.Start
-	c.CurrentLines = allLines[1:relMid]
-	c.ForeignLines = allLines[relMid+1 : relEnd]
+	c.CurrentLines = allLines[c.Start : c.Middle-1]
+	c.ForeignLines = allLines[c.Middle : c.End-1]
 	c.CurrentName = strings.Split(allLines[0], " ")[1]
-	c.ForeignName = strings.Split(allLines[c.End-c.Start], " ")[1]
+	c.ForeignName = strings.Split(allLines[c.End-1], " ")[1]
 	return nil
 }
 
-func parse(diff []byte, dict map[string][]int) error {
-	parts := bytes.Split(diff, []byte(":"))
+func parseRawOutput(diff string, dict map[string][]int) error {
+	parts := strings.Split(diff, ":")
 
-	if len(parts) < 3 {
+	if len(parts) < 3 || !strings.Contains(diff, "marker") {
 		return errors.New("Could not parse line")
 	}
 
@@ -93,6 +92,26 @@ func parse(diff []byte, dict map[string][]int) error {
 		dict[fname] = lines
 	}
 	return nil
+}
+
+func groupConflictOutput(fname string, cwd string, lines []int) ([]Conflict, error) {
+	if len(lines)%3 != 0 {
+		return nil, errors.New("Invalid number of remaining conflict markers")
+	}
+
+	conflicts := []Conflict{}
+	fmt.Println(lines)
+	for i := 0; i < len(lines); i += 3 {
+		conf := Conflict{}
+		conf.Start = lines[i]
+		conf.Middle = lines[i+1]
+		conf.End = lines[i+2]
+		conf.FileName = fname
+		conf.AbsolutePath = path.Join(cwd, fname)
+		conflicts = append(conflicts, conf)
+	}
+
+	return conflicts, nil
 }
 
 func Find() ([]Conflict, error) {
@@ -117,22 +136,22 @@ func Find() ([]Conflict, error) {
 	diffDict := make(map[string][]int)
 
 	for _, line := range output {
-		_ = parse(line, diffDict)
+		_ = parseRawOutput(string(line), diffDict)
 	}
 
 	conflicts := []Conflict{}
 
 	for fname := range diffDict {
-		conf := Conflict{}
-		sort.Ints(diffDict[fname])
-		lines := diffDict[fname]
-		conf.Start, conf.Middle, conf.End = lines[0], lines[1], lines[2]
-		conf.FileName = fname
-		conf.AbsolutePath = path.Join(cmd.Dir, fname)
-		conf.Resolved = false
-
-		conflicts = append(conflicts, conf)
+		if parsedConflicts, err := groupConflictOutput(fname, cmd.Dir, diffDict[fname]); err == nil {
+			for _, c := range parsedConflicts {
+				conflicts = append(conflicts, c)
+			}
+		} else {
+			log.Panic(err)
+		}
 	}
+
+	fmt.Println(conflicts)
 
 	for i := range conflicts {
 		if err := conflicts[i].ExtractLines(); err != nil {
