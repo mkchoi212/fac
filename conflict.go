@@ -12,7 +12,14 @@ import (
 	"path"
 	"strconv"
 	"strings"
+
+	"github.com/alecthomas/chroma"
+	"github.com/alecthomas/chroma/formatters"
+	"github.com/alecthomas/chroma/lexers"
+	"github.com/alecthomas/chroma/styles"
 )
+
+var allFileLines map[string][]string
 
 // Conflict represents a single conflict that may have occured
 type Conflict struct {
@@ -23,8 +30,10 @@ type Conflict struct {
 	Middle       int
 	End          int
 
-	CurrentLines []string
-	ForeignLines []string
+	CurrentLines        []string
+	ForeignLines        []string
+	ColoredCurrentLines []string
+	ColoredForeignLines []string
 
 	CurrentName string
 	ForeignName string
@@ -35,24 +44,66 @@ func (c *Conflict) Resolve() {
 	c.Resolved = true
 }
 
-func (c *Conflict) ExtractLines() error {
-	input, err := os.Open(c.AbsolutePath)
+func (c *Conflict) Highlight() error {
+	var lexer chroma.Lexer
+
+	if lexer = lexers.Match(c.FileName); lexer == nil {
+		for _, block := range [][]string{c.CurrentLines, c.ForeignLines} {
+			fmt.Print(strings.Join(block, "\n"))
+			if trial := lexers.Analyse(strings.Join(block, "")); trial != nil {
+				lexer = trial
+				break
+			}
+		}
+	}
+
+	if lexer == nil {
+		lexer = lexers.Fallback
+		c.ColoredCurrentLines = c.CurrentLines
+		c.ColoredForeignLines = c.ForeignLines
+		return nil
+	}
+
+	style := styles.Get("emacs")
+	formatter := formatters.Get("terminal")
+
+	var it chroma.Iterator
+	var err error
+	buf := new(bytes.Buffer)
+
+tokenizer:
+	for i, block := range [][]string{c.CurrentLines, c.ForeignLines} {
+		for _, line := range block {
+			if it, err = lexer.Tokenise(nil, line); err != nil {
+				break tokenizer
+			}
+			if err = formatter.Format(buf, style, it); err != nil {
+				break tokenizer
+			}
+
+			if i == 0 {
+				c.ColoredCurrentLines = append(c.ColoredCurrentLines, buf.String())
+			} else {
+				c.ColoredForeignLines = append(c.ColoredForeignLines, buf.String())
+			}
+			buf.Reset()
+		}
+	}
+	return err
+}
+
+func ReadFile(absPath string) error {
+
+	input, err := os.Open(absPath)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer input.Close()
 
-	line := 0
 	r := bufio.NewReader(input)
-	allLines := []string{}
 
 	for {
 		data, err := r.ReadBytes('\n')
-		line++
-		if line > c.End && line < c.Start {
-			continue
-		}
-
 		if err == nil || err == io.EOF {
 			if len(data) > 0 && data[len(data)-1] == '\n' {
 				data = data[:len(data)-1]
@@ -60,7 +111,7 @@ func (c *Conflict) ExtractLines() error {
 			if len(data) > 0 && data[len(data)-1] == '\r' {
 				data = data[:len(data)-1]
 			}
-			allLines = append(allLines, string(data))
+			allFileLines[absPath] = append(allFileLines[absPath], string(data))
 		}
 
 		if err != nil {
@@ -70,11 +121,22 @@ func (c *Conflict) ExtractLines() error {
 			break
 		}
 	}
+	return nil
+}
 
-	c.CurrentLines = allLines[c.Start : c.Middle-1]
-	c.ForeignLines = allLines[c.Middle : c.End-1]
-	c.CurrentName = strings.Split(allLines[0], " ")[1]
-	c.ForeignName = strings.Split(allLines[c.End-1], " ")[1]
+func (c *Conflict) ExtractLines() error {
+	lines, ok := allFileLines[c.AbsolutePath]
+	if !ok {
+		if err := ReadFile(c.AbsolutePath); err != nil {
+			log.Panic(err)
+		}
+	}
+
+	lines, _ = allFileLines[c.AbsolutePath]
+	c.CurrentLines = lines[c.Start : c.Middle-1]
+	c.ForeignLines = lines[c.Middle : c.End-1]
+	c.CurrentName = strings.Split(lines[c.Start-1], " ")[1]
+	c.ForeignName = strings.Split(lines[c.End-1], " ")[1]
 	return nil
 }
 
@@ -100,7 +162,6 @@ func groupConflictOutput(fname string, cwd string, lines []int) ([]Conflict, err
 	}
 
 	conflicts := []Conflict{}
-	fmt.Println(lines)
 	for i := 0; i < len(lines); i += 3 {
 		conf := Conflict{}
 		conf.Start = lines[i]
@@ -151,11 +212,13 @@ func Find() ([]Conflict, error) {
 		}
 	}
 
-	fmt.Println(conflicts)
-
+	allFileLines = make(map[string][]string)
 	for i := range conflicts {
 		if err := conflicts[i].ExtractLines(); err != nil {
 			log.Panicln(err)
+		}
+		if err := conflicts[i].Highlight(); err != nil {
+			log.Println(err)
 		}
 	}
 
