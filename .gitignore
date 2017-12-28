@@ -6,3 +6,7 @@
 
 # Test binary, build with `go test -c`
 *.test
+
+# Stuff from VSCode
+.vscode
+debug
