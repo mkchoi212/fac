@@ -1,0 +1,8 @@
+package: resolver
+import:
+- package: github.com/alecthomas/chroma
+  subpackages:
+  - formatters
+  - lexers
+  - styles
+- package: github.com/jroimartin/gocui
