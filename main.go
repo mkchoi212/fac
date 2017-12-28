@@ -85,14 +85,14 @@ func selectConflict(i int, g *gocui.Gui) error {
 			return err
 		}
 		v.Title = conf.CurrentName
-		printLines(v, conf.CurrentLines)
+		printLines(v, conf.ColoredCurrentLines)
 
 		v, err = g.View("foreign")
 		if err != nil {
 			return err
 		}
 		v.Title = conf.ForeignName
-		printLines(v, conf.ForeignLines)
+		printLines(v, conf.ColoredForeignLines)
 		return nil
 	})
 
