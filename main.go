@@ -41,7 +41,6 @@ func layout(g *gocui.Gui) error {
 		v.Title = "Conflicts"
 	}
 
-	selectConflict(0, g)
 	return nil
 }
 
@@ -111,7 +110,6 @@ func nextConflict(g *gocui.Gui, v *gocui.View) error {
 }
 
 func resolveConflict(g *gocui.Gui, v *gocui.View) error {
-
 	g.Update(func(g *gocui.Gui) error {
 		conflicts[current].Resolve()
 		selectConflict(current, g)
@@ -159,6 +157,11 @@ func main() {
 	if err := keyBindings(g); err != nil {
 		log.Panicln(err)
 	}
+
+	g.Update(func(g *gocui.Gui) error {
+		selectConflict(0, g)
+		return nil
+	})
 
 	if err := g.MainLoop(); err != nil && err != gocui.ErrQuit {
 		log.Panicln(err)
