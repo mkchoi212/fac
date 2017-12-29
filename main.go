@@ -5,7 +5,6 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"log"
 
@@ -13,7 +12,7 @@ import (
 )
 
 var (
-	current       = 0
+	curIdx        = 0
 	conflictCount = 0
 	conflicts     = []Conflict{}
 )
@@ -25,87 +24,19 @@ func printLines(v *gocui.View, lines []string) {
 	}
 }
 
-func selectConflict(i int, g *gocui.Gui) error {
-
-	g.Update(func(g *gocui.Gui) error {
-		v, err := g.View("panel")
-		if err != nil {
-			return err
-		}
-		v.Clear()
-
-		for idx, conflict := range conflicts {
-			var out string
-			if conflict.Resolved {
-				out = Green(fmt.Sprintf("✅  %s:%d", conflict.FileName, conflict.Start))
-			} else {
-				out = Red(fmt.Sprintf("%d.  %s:%d", idx+1, conflict.FileName, conflict.Start))
-			}
-
-			if idx == i {
-				fmt.Fprintf(v, "%s <-\n", out)
-			} else {
-				fmt.Fprintf(v, "%s\n", out)
-			}
-		}
-		return nil
-	})
-
-	g.Update(func(g *gocui.Gui) error {
-		conf := conflicts[i]
-
-		v, err := g.View("current")
-		if err != nil {
-			return err
-		}
-		var buf bytes.Buffer
-		buf.WriteString(conf.CurrentName)
-		buf.WriteString(" (Current Change) ")
-		v.Title = buf.String()
-
-		printLines(v, conf.ColoredCurrentLines)
-
-		v, err = g.View("foreign")
-		if err != nil {
-			return err
-		}
-		buf.Reset()
-		buf.WriteString(conf.ForeignName)
-		buf.WriteString(" (Incoming Change) ")
-		v.Title = buf.String()
-
-		printLines(v, conf.ColoredForeignLines)
-		return nil
-	})
-
-	return nil
-}
-
-func nextConflict(g *gocui.Gui, v *gocui.View) error {
-	current = current + 1
-	if current >= conflictCount {
-		current = 0
-	}
-
-	selectConflict(current, g)
-	return nil
-}
-
-func resolveConflict(g *gocui.Gui, v *gocui.View) error {
-	g.Update(func(g *gocui.Gui) error {
-		conflicts[current].Resolve()
-		selectConflict(current, g)
-		return nil
-	})
-	return nil
-}
-
 func quit(g *gocui.Gui, v *gocui.View) error {
 	return gocui.ErrQuit
 }
 
 func parseInput(g *gocui.Gui, v *gocui.View) error {
-	g.Update(updatePrompt(v))
+	v.Clear()
+	v.SetCursor(0, 0)
+	_ = v.Buffer()
+
+	switch {
+	default:
+		printPrompt(g, Red("[a | d] >>"))
+	}
 	return nil
 }
 
@@ -138,7 +69,7 @@ func main() {
 	}
 
 	g.Update(func(g *gocui.Gui) error {
-		selectConflict(0, g)
+		conflicts[0].Select(g)
 		return nil
 	})
 

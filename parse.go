@@ -21,29 +21,6 @@ import (
 
 var allFileLines map[string][]string
 
-// Conflict represents a single conflict that may have occured
-type Conflict struct {
-	Resolved     bool
-	FileName     string
-	AbsolutePath string
-	Start        int
-	Middle       int
-	End          int
-
-	CurrentLines        []string
-	ForeignLines        []string
-	ColoredCurrentLines []string
-	ColoredForeignLines []string
-
-	CurrentName string
-	ForeignName string
-}
-
-// Resolve resolves the conflict
-func (c *Conflict) Resolve() {
-	c.Resolved = true
-}
-
 func (c *Conflict) Highlight() error {
 	var lexer chroma.Lexer
 
@@ -93,7 +70,6 @@ tokenizer:
 }
 
 func ReadFile(absPath string) error {
-
 	input, err := os.Open(absPath)
 	if err != nil {
 		log.Fatal(err)

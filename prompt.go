@@ -1,6 +1,10 @@
 package main
 
-import "github.com/jroimartin/gocui"
+import (
+	"fmt"
+
+	"github.com/jroimartin/gocui"
+)
 
 func promptEditor(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifier) {
 	switch {
@@ -25,12 +29,15 @@ func promptEditor(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifier) {
 	}
 }
 
-func updatePrompt(v *gocui.View) func(g *gocui.Gui) error {
-	_ = v.Buffer()
-	v.Clear()
-	v.SetCursor(0, 0)
-
-	return func(g *gocui.Gui) error {
+func printPrompt(g *gocui.Gui, str string) {
+	g.Update(func(g *gocui.Gui) error {
+		v, err := g.View("input prompt")
+		if err != nil {
+			return err
+		}
+		v.Clear()
+		v.MoveCursor(0, 0, true)
+		fmt.Fprintf(v, str)
 		return nil
-	}
+	})
 }
