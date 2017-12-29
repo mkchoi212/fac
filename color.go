@@ -10,6 +10,17 @@ const (
 	Purple = 5
 )
 
+const (
+	Regular   = 1
+	Light     = 2
+	Highlight = 3
+	Underline = 4
+)
+
 func Colorize(s string, c int) string {
-	return fmt.Sprintf("\033[3%d;%dm%s\033[0m", c, 1, s)
+	return fmt.Sprintf("\033[3%d;%dm%s\033[0m", c, Regular, s)
+}
+
+func ColorizeLight(s string, c int) string {
+	return fmt.Sprintf("\033[3%d;%dm%s\033[0m", c, Light, s)
 }
