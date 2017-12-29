@@ -105,19 +105,7 @@ func quit(g *gocui.Gui, v *gocui.View) error {
 }
 
 func parseInput(g *gocui.Gui, v *gocui.View) error {
-	_ = v.Buffer()
-	v.Clear()
-	v.SetCursor(0, 0)
-
-	g.Update(func(g *gocui.Gui) error {
-		v, err := g.View("input prompt")
-		if err != nil {
-			return err
-		}
-		v.Clear()
-		v.Write([]byte(Red("[try h] >>")))
-		return nil
-	})
+	g.Update(updatePrompt(v))
 	return nil
 }
 

@@ -24,3 +24,13 @@ func promptEditor(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifier) {
 		v.MoveCursor(1, 0, false)
 	}
 }
+
+func updatePrompt(v *gocui.View) func(g *gocui.Gui) error {
+	_ = v.Buffer()
+	v.Clear()
+	v.SetCursor(0, 0)
+
+	return func(g *gocui.Gui) error {
+		return nil
+	}
+}
