@@ -62,7 +62,8 @@ func main() {
 		log.Panicln("No conflicts found")
 	}
 	conflictCount = len(conflicts)
-	fmt.Println("Good-bye!")
+
+	printSummary()
 
 	g, err := gocui.NewGui(gocui.OutputNormal)
 	if err != nil {
