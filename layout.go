@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/jroimartin/gocui"
 )
 
@@ -36,7 +34,7 @@ func layout(g *gocui.Gui) error {
 			return err
 		}
 		v.Frame = false
-		prompt := fmt.Sprintf("\033[3%d;%dm[a | d] >> \033[0m", 2, 1)
+		prompt := Green("[a | d] >>")
 		v.Write([]byte(prompt))
 		v.MoveCursor(11, 0, true)
 	}
