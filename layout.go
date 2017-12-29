@@ -31,7 +31,7 @@ func layout(g *gocui.Gui) error {
 		v.Title = "Conflicts"
 	}
 
-	if v, err := g.SetView("input prompt", 1, viewHeight, 15, viewHeight+inputHeight); err != nil {
+	if v, err := g.SetView("input prompt", 0, viewHeight, 15, viewHeight+inputHeight); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
@@ -41,7 +41,7 @@ func layout(g *gocui.Gui) error {
 		v.MoveCursor(11, 0, true)
 	}
 
-	if v, err := g.SetView("input", 12, viewHeight, maxX, viewHeight+inputHeight); err != nil {
+	if v, err := g.SetView("input", 11, viewHeight, maxX, viewHeight+inputHeight); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
