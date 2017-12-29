@@ -14,9 +14,6 @@ func promptEditor(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifier) {
 		v.EditDelete(false)
 	case key == gocui.KeyInsert:
 		v.Overwrite = !v.Overwrite
-	case key == gocui.KeyEnter:
-		v.Clear()
-		v.SetCursor(0, 0)
 	case key == gocui.KeyArrowDown:
 		v.MoveCursor(0, 1, false)
 	case key == gocui.KeyArrowUp:
