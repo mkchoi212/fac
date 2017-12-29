@@ -5,6 +5,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 
@@ -16,33 +17,6 @@ var (
 	conflictCount = 0
 	conflicts     = []Conflict{}
 )
-
-func layout(g *gocui.Gui) error {
-	maxX, maxY := g.Size()
-	height := maxY - 2
-	branchViewWidth := (maxX / 5) * 2
-
-	if _, err := g.SetView("current", 0, 0, branchViewWidth, height); err != nil {
-		if err != gocui.ErrUnknownView {
-			return err
-		}
-	}
-
-	if _, err := g.SetView("foreign", branchViewWidth, 0, branchViewWidth*2, height); err != nil {
-		if err != gocui.ErrUnknownView {
-			return err
-		}
-	}
-
-	if v, err := g.SetView("panel", branchViewWidth*2, 0, maxX-2, height); err != nil {
-		if err != gocui.ErrUnknownView {
-			return err
-		}
-		v.Title = "Conflicts"
-	}
-
-	return nil
-}
 
 func printLines(v *gocui.View, lines []string) {
 	v.Clear()
@@ -84,14 +58,22 @@ func selectConflict(i int, g *gocui.Gui) error {
 		if err != nil {
 			return err
 		}
-		v.Title = conf.CurrentName
+		var buf bytes.Buffer
+		buf.WriteString(conf.CurrentName)
+		buf.WriteString(" (Current Change) ")
+		v.Title = buf.String()
+
 		printLines(v, conf.ColoredCurrentLines)
 
 		v, err = g.View("foreign")
 		if err != nil {
 			return err
 		}
-		v.Title = conf.ForeignName
+		buf.Reset()
+		buf.WriteString(conf.ForeignName)
+		buf.WriteString(" (Incoming Change) ")
+		v.Title = buf.String()
+
 		printLines(v, conf.ColoredForeignLines)
 		return nil
 	})
@@ -126,15 +108,6 @@ func keyBindings(g *gocui.Gui) error {
 	if err := g.SetKeybinding("", gocui.KeyCtrlC, gocui.ModNone, quit); err != nil {
 		return err
 	}
-
-	if err := g.SetKeybinding("", gocui.KeyTab, gocui.ModNone, nextConflict); err != nil {
-		return err
-	}
-
-	if err := g.SetKeybinding("", gocui.KeyEnter, gocui.ModNone, resolveConflict); err != nil {
-		return err
-	}
-
 	return nil
 }
 
@@ -145,6 +118,7 @@ func main() {
 		log.Panicln("No conflicts found")
 	}
 	conflictCount = len(conflicts)
+	conflicts[0].Diff()
 
 	g, err := gocui.NewGui(gocui.OutputNormal)
 	if err != nil {
@@ -154,6 +128,7 @@ func main() {
 
 	g.SetManagerFunc(layout)
 
+	g.Cursor = true
 	if err := keyBindings(g); err != nil {
 		log.Panicln(err)
 	}
