@@ -37,9 +37,9 @@ func selectConflict(i int, g *gocui.Gui) error {
 		for idx, conflict := range conflicts {
 			var out string
 			if conflict.Resolved {
-				out = fmt.Sprintf("✅  \033[3%d;%dm%s:%d \033[0m", 2, 1, conflict.FileName, conflict.Start)
+				out = Green(fmt.Sprintf("✅  %s:%d", conflict.FileName, conflict.Start))
 			} else {
-				out = fmt.Sprintf("%d. \033[3%d;%dm%s:%d \033[0m", idx+1, 1, 1, conflict.FileName, conflict.Start)
+				out = Red(fmt.Sprintf("%d.  %s:%d", idx+1, conflict.FileName, conflict.Start))
 			}
 
 			if idx == i {
@@ -104,11 +104,27 @@ func quit(g *gocui.Gui, v *gocui.View) error {
 	return gocui.ErrQuit
 }
 
-func keyBindings(g *gocui.Gui) error {
-	if err := g.SetKeybinding("", gocui.KeyCtrlC, gocui.ModNone, quit); err != nil {
-		return err
-	}
+func parseInput(g *gocui.Gui, v *gocui.View) error {
+	_ = v.Buffer()
+	v.Clear()
+	v.SetCursor(0, 0)
+
+	g.Update(func(g *gocui.Gui) error {
+		v, err := g.View("input prompt")
+		if err != nil {
+			return err
+		}
+		v.Clear()
+		v.Write([]byte(Red("[try h] >>")))
+		return nil
+	})
 	return nil
+}
+
+func keyBindings(g *gocui.Gui) error {
+	err := g.SetKeybinding("", gocui.KeyCtrlC, gocui.ModNone, quit)
+	err = g.SetKeybinding("", gocui.KeyEnter, gocui.ModNone, parseInput)
+	return err
 }
 
 func main() {
