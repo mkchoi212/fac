@@ -29,6 +29,13 @@ func promptEditor(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifier) {
 	}
 }
 
+func globalQuit(g *gocui.Gui) {
+	g.Update(func(g *gocui.Gui) error {
+		v, _ := g.View("")
+		return quit(g, v)
+	})
+}
+
 func printPrompt(g *gocui.Gui, str string) {
 	g.Update(func(g *gocui.Gui) error {
 		v, err := g.View("input prompt")

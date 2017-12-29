@@ -76,7 +76,7 @@ func main() {
 		log.Panicln(err)
 	}
 
-	conflicts[0].Select(g)
+	conflicts[0].Select(g, false)
 
 	if err := g.MainLoop(); err != nil && err != gocui.ErrQuit {
 		log.Panicln(err)

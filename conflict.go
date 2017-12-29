@@ -34,7 +34,7 @@ func (c *Conflict) isEqual(c2 *Conflict) bool {
 	return c.FileName == c2.FileName && c.Start == c2.Start
 }
 
-func (c *Conflict) Select(g *gocui.Gui) error {
+func (c *Conflict) Select(g *gocui.Gui, withHelp bool) error {
 	g.Update(func(g *gocui.Gui) error {
 		v, err := g.View("panel")
 		if err != nil {
@@ -55,6 +55,10 @@ func (c *Conflict) Select(g *gocui.Gui) error {
 			} else {
 				fmt.Fprintf(v, "%s\n", out)
 			}
+		}
+
+		if withHelp {
+			printHelp(v)
 		}
 		return nil
 	})
@@ -107,12 +111,9 @@ func nextConflict(g *gocui.Gui, v *gocui.View) error {
 	}
 
 	if originalCur == cur {
-		g.Update(func(g *gocui.Gui) error {
-			v, _ = g.View("")
-			return quit(g, v)
-		})
+		globalQuit(g)
 	}
 
-	conflicts[cur].Select(g)
+	conflicts[cur].Select(g, false)
 	return nil
 }
