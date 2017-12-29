@@ -9,3 +9,4 @@
 <br>
 
 ## 👮 License
+See [License](./LICENSE)
