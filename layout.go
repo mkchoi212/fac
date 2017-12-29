@@ -29,17 +29,17 @@ func layout(g *gocui.Gui) error {
 		v.Title = "Conflicts"
 	}
 
-	if v, err := g.SetView("input prompt", 0, viewHeight, 15, viewHeight+inputHeight); err != nil {
+	if v, err := g.SetView("input prompt", 0, viewHeight, 14, viewHeight+inputHeight); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
 		v.Frame = false
-		prompt := Green("[a | d] >>")
+		prompt := Colorize("[wasd] >>", Green)
 		v.Write([]byte(prompt))
 		v.MoveCursor(11, 0, true)
 	}
 
-	if v, err := g.SetView("input", 11, viewHeight, maxX, viewHeight+inputHeight); err != nil {
+	if v, err := g.SetView("input", 10, viewHeight, maxX, viewHeight+inputHeight); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}

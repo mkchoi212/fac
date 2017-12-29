@@ -37,13 +37,15 @@ func parseInput(g *gocui.Gui, v *gocui.View) error {
 	switch {
 	case in == "a":
 		conflicts[cur].Resolve(g, v, Local)
-		printPrompt(g, Green("[a | d] >>"))
 	case in == "d":
 		conflicts[cur].Resolve(g, v, Incoming)
-		printPrompt(g, Green("[a | d] >>"))
+	case in == "h":
+		conflicts[cur].Select(g, true)
 	default:
-		printPrompt(g, Red("[a | d] >>"))
+		printPrompt(g, Colorize("[wasd] >>", Red))
+		return nil
 	}
+	printPrompt(g, Colorize("[wasd] >>", Green))
 	return nil
 }
 

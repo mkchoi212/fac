@@ -2,10 +2,14 @@ package main
 
 import "fmt"
 
-func Red(s string) string {
-	return fmt.Sprintf("\033[3%d;%dm%s\033[0m", 1, 1, s)
-}
+const (
+	Red    = 1
+	Green  = 2
+	Yellow = 3
+	Blue   = 4
+	Purple = 5
+)
 
-func Green(s string) string {
-	return fmt.Sprintf("\033[3%d;%dm%s\033[0m", 2, 1, s)
+func Colorize(s string, c int) string {
+	return fmt.Sprintf("\033[3%d;%dm%s\033[0m", c, 1, s)
 }

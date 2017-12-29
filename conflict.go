@@ -45,9 +45,9 @@ func (c *Conflict) Select(g *gocui.Gui) error {
 		for idx, conflict := range conflicts {
 			var out string
 			if conflict.Resolved {
-				out = Green(fmt.Sprintf("✅  %s:%d", conflict.FileName, conflict.Start))
+				out = Colorize(fmt.Sprintf("✅  %s:%d", conflict.FileName, conflict.Start), Green)
 			} else {
-				out = Red(fmt.Sprintf("%d.  %s:%d", idx+1, conflict.FileName, conflict.Start))
+				out = Colorize(fmt.Sprintf("%d.  %s:%d", idx+1, conflict.FileName, conflict.Start), Red)
 			}
 
 			if conflict.isEqual(c) {
