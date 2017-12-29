@@ -7,12 +7,13 @@ package main
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/jroimartin/gocui"
 )
 
 var (
-	curIdx        = 0
+	cur           = 0
 	conflictCount = 0
 	conflicts     = []Conflict{}
 )
@@ -29,11 +30,17 @@ func quit(g *gocui.Gui, v *gocui.View) error {
 }
 
 func parseInput(g *gocui.Gui, v *gocui.View) error {
+	in := strings.TrimSuffix(v.Buffer(), "\n")
 	v.Clear()
 	v.SetCursor(0, 0)
-	_ = v.Buffer()
 
 	switch {
+	case in == "a":
+		conflicts[cur].Resolve(g, v, Local)
+		printPrompt(g, Green("[a | d] >>"))
+	case in == "d":
+		conflicts[cur].Resolve(g, v, Incoming)
+		printPrompt(g, Green("[a | d] >>"))
 	default:
 		printPrompt(g, Red("[a | d] >>"))
 	}
@@ -53,25 +60,21 @@ func main() {
 		log.Panicln("No conflicts found")
 	}
 	conflictCount = len(conflicts)
-	conflicts[0].Diff()
+	fmt.Println("Good-bye!")
 
 	g, err := gocui.NewGui(gocui.OutputNormal)
 	if err != nil {
 		log.Panicln(err)
 	}
 	defer g.Close()
-
 	g.SetManagerFunc(layout)
-
 	g.Cursor = true
+
 	if err := keyBindings(g); err != nil {
 		log.Panicln(err)
 	}
 
-	g.Update(func(g *gocui.Gui) error {
-		conflicts[0].Select(g)
-		return nil
-	})
+	conflicts[0].Select(g)
 
 	if err := g.MainLoop(); err != nil && err != gocui.ErrQuit {
 		log.Panicln(err)

@@ -25,6 +25,11 @@ type Conflict struct {
 	ForeignName string
 }
 
+const (
+	Local    = 0
+	Incoming = 1
+)
+
 func (c *Conflict) isEqual(c2 *Conflict) bool {
 	return c.FileName == c2.FileName && c.Start == c2.Start
 }
@@ -82,7 +87,7 @@ func (c *Conflict) Select(g *gocui.Gui) error {
 	return nil
 }
 
-func (c *Conflict) Resolve(g *gocui.Gui, v *gocui.View) error {
+func (c *Conflict) Resolve(g *gocui.Gui, v *gocui.View, version int) error {
 	g.Update(func(g *gocui.Gui) error {
 		c.Resolved = true
 		nextConflict(g, v)
@@ -92,11 +97,22 @@ func (c *Conflict) Resolve(g *gocui.Gui, v *gocui.View) error {
 }
 
 func nextConflict(g *gocui.Gui, v *gocui.View) error {
-	curIdx = curIdx + 1
-	if curIdx >= conflictCount {
-		curIdx = 0
+	originalCur := cur
+
+	for originalCur != cur {
+		cur++
+		if cur >= conflictCount {
+			cur = 0
+		}
 	}
 
-	conflicts[curIdx].Select(g)
+	if originalCur == cur {
+		g.Update(func(g *gocui.Gui) error {
+			v, _ = g.View("")
+			return quit(g, v)
+		})
+	}
+
+	conflicts[cur].Select(g)
 	return nil
 }
