@@ -76,7 +76,11 @@ func (c *Conflict) Select(g *gocui.Gui, withHelp bool) error {
 		buf.WriteString(" (Current Change) ")
 		v.Title = buf.String()
 
+		top, bottom := c.getPaddingLines()
+		v.Clear()
+		printLines(v, top)
 		printLines(v, c.ColoredCurrentLines)
+		printLines(v, bottom)
 
 		v, err = g.View(Foreign)
 		if err != nil {
@@ -87,7 +91,11 @@ func (c *Conflict) Select(g *gocui.Gui, withHelp bool) error {
 		buf.WriteString(" (Incoming Change) ")
 		v.Title = buf.String()
 
+		top, bottom = c.getPaddingLines()
+		v.Clear()
+		printLines(v, top)
 		printLines(v, c.ColoredForeignLines)
+		printLines(v, bottom)
 		return nil
 	})
 	return nil
@@ -100,6 +108,28 @@ func (c *Conflict) Resolve(g *gocui.Gui, v *gocui.View, version int) error {
 		return nil
 	})
 	return nil
+}
+
+func (c *Conflict) getPaddingLines() (topPadding, bottomPadding []string) {
+	lines := allFileLines[c.AbsolutePath]
+	start, end := c.Start-1, c.End
+
+	if c.topPeek >= start {
+		c.topPeek = start
+	}
+
+	for _, l := range lines[start-c.topPeek : start] {
+		topPadding = append(topPadding, Colorize(l, Gray))
+	}
+
+	if c.bottomPeek >= len(lines)-c.End {
+		c.bottomPeek = len(lines) - c.End
+	}
+
+	for _, l := range lines[end : end+c.bottomPeek] {
+		bottomPadding = append(bottomPadding, Colorize(l, Gray))
+	}
+	return
 }
 
 func nextConflict(g *gocui.Gui, v *gocui.View) error {
