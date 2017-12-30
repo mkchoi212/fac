@@ -29,34 +29,48 @@ func quit(g *gocui.Gui, v *gocui.View) error {
 }
 
 func parseInput(g *gocui.Gui, v *gocui.View) error {
+	evalCmd := func(in rune, g *gocui.Gui) {
+		switch {
+		case in == 'j':
+			scroll(g, &conflicts[cur], Up)
+		case in == 'k':
+			scroll(g, &conflicts[cur], Down)
+		case in == 'w':
+			conflicts[cur].topPeek++
+			conflicts[cur].Select(g, false)
+		case in == 's':
+			conflicts[cur].bottomPeek++
+			conflicts[cur].Select(g, false)
+		case in == 'a':
+			conflicts[cur].Resolve(g, v, Local)
+		case in == 'd':
+			conflicts[cur].Resolve(g, v, Incoming)
+		case in == 'h' || in == '?':
+			conflicts[cur].Select(g, true)
+		case in == 'q':
+			globalQuit(g)
+		default:
+			printPrompt(g, Red(Regular, "[wasd] >>"))
+		}
+		printPrompt(g, Green(Regular, "[wasd] >>"))
+	}
+
 	in := strings.TrimSuffix(v.Buffer(), "\n")
 	v.Clear()
 	v.SetCursor(0, 0)
 
-	switch {
-	case in == "k":
-		scroll(g, Up)
-	case in == "j":
-		scroll(g, Down)
-	case in == "w":
-		conflicts[cur].topPeek++
-		conflicts[cur].Select(g, false)
-	case in == "s":
-		conflicts[cur].bottomPeek++
-		conflicts[cur].Select(g, false)
-	case in == "a":
-		conflicts[cur].Resolve(g, v, Local)
-	case in == "d":
-		conflicts[cur].Resolve(g, v, Incoming)
-	case in == "h":
-		conflicts[cur].Select(g, true)
-	case in == "q":
-		globalQuit(g)
-	default:
-		printPrompt(g, Green(Regular, "[wasd] >>"))
-		return nil
+	if len(in) > 1 {
+		for _, r := range [...]rune{'a', 'd', 'h'} {
+			if strings.ContainsRune(in, r) {
+				printPrompt(g, Red(Regular, "[wasd] >>"))
+				return nil
+			}
+		}
 	}
-	printPrompt(g, Green(Regular, "[wasd] >>"))
+
+	for _, c := range in {
+		evalCmd(c, g)
+	}
 	return nil
 }
 
