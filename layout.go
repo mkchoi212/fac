@@ -42,7 +42,7 @@ func layout(g *gocui.Gui) error {
 			return err
 		}
 		v.Frame = false
-		prompt := Colorize("[wasd] >>", Green)
+		prompt := Green(Regular, "[wasd] >>")
 		v.Write([]byte(prompt))
 		v.MoveCursor(11, 0, true)
 	}

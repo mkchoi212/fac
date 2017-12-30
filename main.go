@@ -49,10 +49,10 @@ func parseInput(g *gocui.Gui, v *gocui.View) error {
 	case in == "q":
 		globalQuit(g)
 	default:
-		printPrompt(g, Colorize("[wasd] >>", Red))
+		printPrompt(g, Green(Regular, "[wasd] >>"))
 		return nil
 	}
-	printPrompt(g, Colorize("[wasd] >>", Green))
+	printPrompt(g, Green(Regular, "[wasd] >>"))
 	return nil
 }
 

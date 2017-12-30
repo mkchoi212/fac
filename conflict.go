@@ -48,9 +48,9 @@ func (c *Conflict) Select(g *gocui.Gui, withHelp bool) error {
 		for idx, conflict := range conflicts {
 			var out string
 			if conflict.Resolved {
-				out = Colorize(fmt.Sprintf("✅  %s:%d", conflict.FileName, conflict.Start), Green)
+				out = Green(Regular, "✅  %s:%d", conflict.FileName, conflict.Start)
 			} else {
-				out = Colorize(fmt.Sprintf("%d.  %s:%d", idx+1, conflict.FileName, conflict.Start), Red)
+				out = Red(Regular, "%d. %s:%d", idx+1, conflict.FileName, conflict.Start)
 			}
 
 			if conflict.isEqual(c) {
@@ -119,7 +119,7 @@ func (c *Conflict) getPaddingLines() (topPadding, bottomPadding []string) {
 	}
 
 	for _, l := range lines[start-c.topPeek : start] {
-		topPadding = append(topPadding, Colorize(l, Gray))
+		topPadding = append(topPadding, Black(Regular, l))
 	}
 
 	if c.bottomPeek >= len(lines)-c.End {
@@ -127,7 +127,7 @@ func (c *Conflict) getPaddingLines() (topPadding, bottomPadding []string) {
 	}
 
 	for _, l := range lines[end : end+c.bottomPeek] {
-		bottomPadding = append(bottomPadding, Colorize(l, Gray))
+		bottomPadding = append(bottomPadding, Black(Regular, l))
 	}
 	return
 }

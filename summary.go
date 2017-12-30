@@ -17,7 +17,7 @@ func printHelp(v *gocui.View) {
 	h - print help
 	q || Ctrl+c - quit application
 	`
-	fmt.Fprintf(v, Colorize(instruction, Purple))
+	fmt.Fprintf(v, Purple(Regular, instruction))
 }
 
 func printSummary() {
@@ -26,10 +26,10 @@ func printSummary() {
 
 	for _, c := range conflicts {
 		if c.Resolved {
-			line = Colorize(fmt.Sprintf("✔ %s: %d", c.FileName, c.Start), Green)
+			line = Green(Regular, "✔ %s: %d", c.FileName, c.Start)
 			resolvedCnt++
 		} else {
-			line = Colorize(fmt.Sprintf("✘ %s: %d", c.FileName, c.Start), Red)
+			line = Red(Regular, "✘ %s: %d", c.FileName, c.Start)
 		}
 		fmt.Println(line)
 	}
@@ -37,11 +37,11 @@ func printSummary() {
 	var buf bytes.Buffer
 	if resolvedCnt != len(conflicts) {
 		buf.WriteString("\nResolved ")
-		buf.WriteString(ColorizeLight(fmt.Sprintf("%d ", resolvedCnt), Red))
+		buf.WriteString(Red(Light, "%d ", resolvedCnt))
 		buf.WriteString("conflict(s) out of ")
-		buf.WriteString(ColorizeLight(fmt.Sprintf("%d", len(conflicts)), Red))
+		buf.WriteString(Red(Light, "%d", len(conflicts)))
 	} else {
-		buf.WriteString(Colorize(fmt.Sprintf("\nFixed All Conflicts 🎉"), Green))
+		buf.WriteString(Green(Regular, "\nFixed All Conflicts 🎉"))
 	}
 	fmt.Println(buf.String())
 }
