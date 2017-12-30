@@ -3,6 +3,7 @@ package main
 import "fmt"
 
 const (
+	Gray   = 0
 	Red    = 1
 	Green  = 2
 	Yellow = 3

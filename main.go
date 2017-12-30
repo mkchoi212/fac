@@ -19,7 +19,6 @@ var (
 )
 
 func printLines(v *gocui.View, lines []string) {
-	v.Clear()
 	for _, line := range lines {
 		fmt.Fprintln(v, line)
 	}
