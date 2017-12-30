@@ -20,7 +20,7 @@ func printHelp(v *gocui.View) {
 	h | ? - print help
 	q | Ctrl+c - quit
 	`
-	fmt.Fprintf(v, Black(Regular, instruction))
+	fmt.Fprintf(v, Blue(Regular, instruction))
 }
 
 func printSummary() {

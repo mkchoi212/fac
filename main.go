@@ -16,6 +16,8 @@ var (
 	cur           = 0
 	conflictCount = 0
 	conflicts     = []Conflict{}
+
+	consecutiveError = 0
 )
 
 func printLines(v *gocui.View, lines []string) {
@@ -51,8 +53,12 @@ func parseInput(g *gocui.Gui, v *gocui.View) error {
 			globalQuit(g)
 		default:
 			printPrompt(g, Red(Regular, "[wasd] >>"))
+			consecutiveError++
 		}
-		printPrompt(g, Green(Regular, "[wasd] >>"))
+		if consecutiveError == 2 {
+			consecutiveError = 0
+			conflicts[cur].Select(g, true)
+		}
 	}
 
 	in := strings.TrimSuffix(v.Buffer(), "\n")
