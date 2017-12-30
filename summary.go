@@ -29,7 +29,7 @@ func printSummary() {
 	var line string
 
 	for _, c := range conflicts {
-		if c.Resolved {
+		if c.Choice != 0 {
 			line = Green(Regular, "✔ %s: %d", c.FileName, c.Start)
 			resolvedCnt++
 		} else {

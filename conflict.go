@@ -9,7 +9,7 @@ import (
 
 // Conflict represents a single conflict that may have occured
 type Conflict struct {
-	Resolved     bool
+	Choice       int
 	FileName     string
 	AbsolutePath string
 	Start        int
@@ -30,10 +30,10 @@ type Conflict struct {
 }
 
 const (
-	Local    = 0
-	Incoming = 1
-	Up       = 2
-	Down     = 3
+	Local    = 1
+	Incoming = 2
+	Up       = 3
+	Down     = 4
 )
 
 func (c *Conflict) isEqual(c2 *Conflict) bool {
@@ -54,7 +54,7 @@ func (c *Conflict) Select(g *gocui.Gui, showHelp bool) error {
 
 		for idx, conflict := range conflicts {
 			var out string
-			if conflict.Resolved {
+			if conflict.Choice != 0 {
 				out = Green(Regular, "✅  %s:%d", conflict.FileName, conflict.Start)
 			} else {
 				out = Red(Regular, "%d. %s:%d", idx+1, conflict.FileName, conflict.Start)
@@ -140,7 +140,7 @@ func (c *Conflict) getPaddingLines() (topPadding, bottomPadding []string) {
 
 func (c *Conflict) Resolve(g *gocui.Gui, v *gocui.View, version int) error {
 	g.Update(func(g *gocui.Gui) error {
-		c.Resolved = true
+		c.Choice = version
 		nextConflict(g, v)
 		return nil
 	})
