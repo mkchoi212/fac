@@ -56,12 +56,6 @@ func parseInput(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-func keyBindings(g *gocui.Gui) error {
-	err := g.SetKeybinding("", gocui.KeyCtrlC, gocui.ModNone, quit)
-	err = g.SetKeybinding("", gocui.KeyEnter, gocui.ModNone, parseInput)
-	return err
-}
-
 func main() {
 	var err error
 	conflicts, err = Find()
@@ -70,18 +64,18 @@ func main() {
 	}
 	conflictCount = len(conflicts)
 
-	printSummary()
-
 	g, err := gocui.NewGui(gocui.OutputNormal)
 	if err != nil {
 		log.Panicln(err)
 	}
-	defer g.Close()
 	g.SetManagerFunc(layout)
 	g.Cursor = true
 
-	if err := keyBindings(g); err != nil {
-		log.Panicln(err)
+	if err := g.SetKeybinding("", gocui.KeyCtrlC, gocui.ModNone, quit); err != nil {
+		log.Panic(err)
+	}
+	if err := g.SetKeybinding("", gocui.KeyEnter, gocui.ModNone, parseInput); err != nil {
+		log.Panic(err)
 	}
 
 	conflicts[0].Select(g, false)
@@ -89,4 +83,7 @@ func main() {
 	if err := g.MainLoop(); err != nil && err != gocui.ErrQuit {
 		log.Panicln(err)
 	}
+
+	g.Close()
+	printSummary()
 }
