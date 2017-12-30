@@ -41,6 +41,8 @@ func parseInput(g *gocui.Gui, v *gocui.View) error {
 		conflicts[cur].Resolve(g, v, Incoming)
 	case in == "h":
 		conflicts[cur].Select(g, true)
+	case in == "q":
+		globalQuit(g)
 	default:
 		printPrompt(g, Colorize("[wasd] >>", Red))
 		return nil

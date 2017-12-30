@@ -15,7 +15,7 @@ func printHelp(v *gocui.View) {
 	d - select right screen
 
 	h - print help
-	Ctrl+c - quit application
+	q || Ctrl+c - quit application
 	`
 	fmt.Fprintf(v, Colorize(instruction, Purple))
 }
