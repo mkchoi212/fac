@@ -51,13 +51,16 @@ func parseInput(g *gocui.Gui, v *gocui.View) error {
 			conflicts[cur].Select(g, true)
 		case in == 'q':
 			globalQuit(g)
+		case in == 'z':
+			conflicts[cur].toggleDiff()
+			conflicts[cur].Select(g, false)
 		default:
 			printPrompt(g, Red(Regular, "[wasd] >>"))
 			consecutiveError++
 		}
 		if consecutiveError == 2 {
 			consecutiveError = 0
-			conflicts[cur].Select(g, true)
+			conflicts[cur].Select(g, false)
 		}
 	}
 
@@ -66,7 +69,7 @@ func parseInput(g *gocui.Gui, v *gocui.View) error {
 	v.SetCursor(0, 0)
 
 	if len(in) > 1 {
-		for _, r := range [...]rune{'a', 'd', 'h'} {
+		for _, r := range [...]rune{'a', 'd', 'h', 'z'} {
 			if strings.ContainsRune(in, r) {
 				printPrompt(g, Red(Regular, "[wasd] >>"))
 				return nil

@@ -24,8 +24,9 @@ type Conflict struct {
 	CurrentName string
 	ForeignName string
 
-	topPeek    int
-	bottomPeek int
+	topPeek     int
+	bottomPeek  int
+	displayDiff bool
 }
 
 const (
@@ -39,7 +40,11 @@ func (c *Conflict) isEqual(c2 *Conflict) bool {
 	return c.FileName == c2.FileName && c.Start == c2.Start
 }
 
-func (c *Conflict) Select(g *gocui.Gui, withHelp bool) error {
+func (c *Conflict) toggleDiff() {
+	c.displayDiff = !(c.displayDiff)
+}
+
+func (c *Conflict) Select(g *gocui.Gui, showHelp bool) error {
 	g.Update(func(g *gocui.Gui) error {
 		v, err := g.View(Panel)
 		if err != nil {
@@ -62,7 +67,7 @@ func (c *Conflict) Select(g *gocui.Gui, withHelp bool) error {
 			}
 		}
 
-		if withHelp {
+		if showHelp {
 			printHelp(v)
 		}
 		return nil
@@ -81,7 +86,11 @@ func (c *Conflict) Select(g *gocui.Gui, withHelp bool) error {
 		top, bottom := c.getPaddingLines()
 		v.Clear()
 		printLines(v, top)
-		printLines(v, c.ColoredCurrentLines)
+		if c.displayDiff {
+			printLines(v, c.diff())
+		} else {
+			printLines(v, c.ColoredCurrentLines)
+		}
 		printLines(v, bottom)
 
 		v, err = g.View(Foreign)
