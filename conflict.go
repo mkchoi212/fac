@@ -23,6 +23,9 @@ type Conflict struct {
 
 	CurrentName string
 	ForeignName string
+
+	topPeek    int
+	bottomPeek int
 }
 
 const (
@@ -36,7 +39,7 @@ func (c *Conflict) isEqual(c2 *Conflict) bool {
 
 func (c *Conflict) Select(g *gocui.Gui, withHelp bool) error {
 	g.Update(func(g *gocui.Gui) error {
-		v, err := g.View("panel")
+		v, err := g.View(Panel)
 		if err != nil {
 			return err
 		}
@@ -64,7 +67,7 @@ func (c *Conflict) Select(g *gocui.Gui, withHelp bool) error {
 	})
 
 	g.Update(func(g *gocui.Gui) error {
-		v, err := g.View("current")
+		v, err := g.View(Current)
 		if err != nil {
 			return err
 		}
@@ -75,7 +78,7 @@ func (c *Conflict) Select(g *gocui.Gui, withHelp bool) error {
 
 		printLines(v, c.ColoredCurrentLines)
 
-		v, err = g.View("foreign")
+		v, err = g.View(Foreign)
 		if err != nil {
 			return err
 		}
@@ -87,7 +90,6 @@ func (c *Conflict) Select(g *gocui.Gui, withHelp bool) error {
 		printLines(v, c.ColoredForeignLines)
 		return nil
 	})
-
 	return nil
 }
 

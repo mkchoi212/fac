@@ -38,7 +38,7 @@ func globalQuit(g *gocui.Gui) {
 
 func printPrompt(g *gocui.Gui, str string) {
 	g.Update(func(g *gocui.Gui) error {
-		v, err := g.View("input prompt")
+		v, err := g.View(Prompt)
 		if err != nil {
 			return err
 		}
