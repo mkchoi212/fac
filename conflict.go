@@ -109,6 +109,8 @@ func (c *Conflict) getPaddingLines() (topPadding, bottomPadding []string) {
 
 	if c.topPeek >= start {
 		c.topPeek = start
+	} else if c.topPeek < 0 {
+		c.topPeek = 0
 	}
 
 	for _, l := range lines[start-c.topPeek : start] {
@@ -117,6 +119,8 @@ func (c *Conflict) getPaddingLines() (topPadding, bottomPadding []string) {
 
 	if c.bottomPeek >= len(lines)-c.End {
 		c.bottomPeek = len(lines) - c.End
+	} else if c.bottomPeek < 0 {
+		c.bottomPeek = 0
 	}
 
 	for _, l := range lines[end : end+c.bottomPeek] {
@@ -150,4 +154,17 @@ func nextConflict(g *gocui.Gui, v *gocui.View) error {
 
 	conflicts[cur].Select(g, false)
 	return nil
+}
+
+func scroll(g *gocui.Gui, c *Conflict, direction int) {
+	if direction == Up {
+		c.topPeek--
+		c.bottomPeek++
+	} else if direction == Down {
+		c.topPeek++
+	} else {
+		return
+	}
+
+	c.Select(g, false)
 }

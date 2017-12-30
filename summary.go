@@ -14,10 +14,13 @@ func printHelp(v *gocui.View) {
 	a - select left screen
 	d - select right screen
 
-	h - print help
-	q || Ctrl+c - quit application
+	j - scroll down
+	k - scroll up
+
+	h | ? - print help
+	q | Ctrl+c - quit
 	`
-	fmt.Fprintf(v, Purple(Regular, instruction))
+	fmt.Fprintf(v, Black(Regular, instruction))
 }
 
 func printSummary() {
