@@ -31,6 +31,8 @@ type Conflict struct {
 const (
 	Local    = 0
 	Incoming = 1
+	Up       = 2
+	Down     = 3
 )
 
 func (c *Conflict) isEqual(c2 *Conflict) bool {
@@ -101,15 +103,6 @@ func (c *Conflict) Select(g *gocui.Gui, withHelp bool) error {
 	return nil
 }
 
-func (c *Conflict) Resolve(g *gocui.Gui, v *gocui.View, version int) error {
-	g.Update(func(g *gocui.Gui) error {
-		c.Resolved = true
-		nextConflict(g, v)
-		return nil
-	})
-	return nil
-}
-
 func (c *Conflict) getPaddingLines() (topPadding, bottomPadding []string) {
 	lines := allFileLines[c.AbsolutePath]
 	start, end := c.Start-1, c.End
@@ -130,6 +123,15 @@ func (c *Conflict) getPaddingLines() (topPadding, bottomPadding []string) {
 		bottomPadding = append(bottomPadding, Black(Regular, l))
 	}
 	return
+}
+
+func (c *Conflict) Resolve(g *gocui.Gui, v *gocui.View, version int) error {
+	g.Update(func(g *gocui.Gui) error {
+		c.Resolved = true
+		nextConflict(g, v)
+		return nil
+	})
+	return nil
 }
 
 func nextConflict(g *gocui.Gui, v *gocui.View) error {

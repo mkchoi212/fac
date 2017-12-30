@@ -34,6 +34,10 @@ func parseInput(g *gocui.Gui, v *gocui.View) error {
 	v.SetCursor(0, 0)
 
 	switch {
+	case in == "k":
+		scroll(g, Up)
+	case in == "j":
+		scroll(g, Down)
 	case in == "w":
 		conflicts[cur].topPeek++
 		conflicts[cur].Select(g, false)
