@@ -85,7 +85,7 @@ func parseInput(g *gocui.Gui, v *gocui.View) error {
 
 func main() {
 	var err error
-	conflicts, err = Find()
+	conflicts, err = FindConflicts()
 	if err != nil {
 		switch err.(type) {
 		case *ErrNoConflict:

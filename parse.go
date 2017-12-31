@@ -125,12 +125,12 @@ func parseRawOutput(diff string, dict map[string][]int) error {
 	return nil
 }
 
-func groupConflictOutput(fname string, cwd string, lines []int) ([]Conflict, error) {
+func CreateConflictStructs(fname string, cwd string, lines []int) ([]Conflict, error) {
 	if len(lines)%3 != 0 {
 		return nil, errors.New("Invalid number of remaining conflict markers")
 	}
 
-	conflicts := []Conflict{}
+	parsedConflicts := []Conflict{}
 	for i := 0; i < len(lines); i += 3 {
 		conf := Conflict{}
 		conf.Start = lines[i]
@@ -138,13 +138,13 @@ func groupConflictOutput(fname string, cwd string, lines []int) ([]Conflict, err
 		conf.End = lines[i+2]
 		conf.FileName = fname
 		conf.AbsolutePath = path.Join(cwd, fname)
-		conflicts = append(conflicts, conf)
+		parsedConflicts = append(parsedConflicts, conf)
 	}
 
-	return conflicts, nil
+	return parsedConflicts, nil
 }
 
-func Find() (conflicts []Conflict, err error) {
+func FindConflicts() (conflicts []Conflict, err error) {
 	dummyPath := "/Users/mikechoi/src/CSCE-313/"
 	stdout, stderr, _ := RunCommand("git", dummyPath, "--no-pager", "diff", "--check")
 
@@ -168,8 +168,8 @@ func Find() (conflicts []Conflict, err error) {
 	}
 
 	for fname := range diffMap {
-		if groupedConflicts, err := groupConflictOutput(fname, dummyPath, diffMap[fname]); err == nil {
-			conflicts = append(conflicts, groupedConflicts...)
+		if out, err := CreateConflictStructs(fname, dummyPath, diffMap[fname]); err == nil {
+			conflicts = append(conflicts, out...)
 		} else {
 			return nil, err
 		}
