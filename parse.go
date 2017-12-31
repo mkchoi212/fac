@@ -160,7 +160,7 @@ func Find() ([]Conflict, error) {
 
 	cmdOut, err = cmd.Output()
 	if !(strings.Contains(err.Error(), "exit status 2")) {
-		return nil, err
+		return nil, NewErrNoConflict("No conflicts detected 🎉")
 	}
 
 	output := bytes.Split(cmdOut, []byte("\n"))
@@ -178,17 +178,17 @@ func Find() ([]Conflict, error) {
 				conflicts = append(conflicts, c)
 			}
 		} else {
-			log.Panic(err)
+			return nil, err
 		}
 	}
 
 	allFileLines = make(map[string][]string)
 	for i := range conflicts {
 		if err := conflicts[i].ExtractLines(); err != nil {
-			log.Panicln(err)
+			return nil, err
 		}
 		if err := conflicts[i].Highlight(); err != nil {
-			log.Println(err)
+			return nil, err
 		}
 	}
 

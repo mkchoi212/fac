@@ -87,7 +87,13 @@ func main() {
 	var err error
 	conflicts, err = Find()
 	if err != nil {
-		log.Panicln("No conflicts found")
+		switch err.(type) {
+		case *ErrNoConflict:
+			fmt.Println(Green(Regular, err.Error()))
+			return
+		default:
+			log.Panicln(err)
+		}
 	}
 	conflictCount = len(conflicts)
 

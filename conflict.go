@@ -29,6 +29,20 @@ type Conflict struct {
 	displayDiff bool
 }
 
+type ErrNoConflict struct {
+	message string
+}
+
+func NewErrNoConflict(message string) *ErrNoConflict {
+	return &ErrNoConflict{
+		message: message,
+	}
+}
+
+func (e *ErrNoConflict) Error() string {
+	return e.message
+}
+
 const (
 	Local    = 1
 	Incoming = 2
