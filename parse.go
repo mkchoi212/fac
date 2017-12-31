@@ -20,7 +20,7 @@ import (
 
 var allFileLines map[string][]string
 
-func (c *Conflict) Highlight() error {
+func (c *Conflict) syntaxHighlight() error {
 	var lexer chroma.Lexer
 
 	if lexer = lexers.Match(c.FileName); lexer == nil {
@@ -144,38 +144,32 @@ func groupConflictOutput(fname string, cwd string, lines []int) ([]Conflict, err
 	return conflicts, nil
 }
 
-func Find() ([]Conflict, error) {
+func Find() (conflicts []Conflict, err error) {
 	dummyPath := "/Users/mikechoi/src/CSCE-313/"
+	stdout, stderr, _ := RunCommand("git", dummyPath, "--no-pager", "diff", "--check")
 
-	cmdName := "git"
-	cmdArgs := []string{"--no-pager", "diff", "--check"}
-	var (
-		cmdOut []byte
-		err    error
-	)
-
-	cmd := exec.Command(cmdName, cmdArgs...)
-	cmd.Dir = dummyPath
-
-	cmdOut, err = cmd.Output()
-	if !(strings.Contains(err.Error(), "exit status 2")) {
+	if len(stderr) != 0 {
+		return nil, errors.New(stderr)
+	} else if len(stdout) == 0 {
 		return nil, NewErrNoConflict("No conflicts detected 🎉")
 	}
 
-	output := bytes.Split(cmdOut, []byte("\n"))
-	diffDict := make(map[string][]int)
+	stdoutLines := strings.Split(stdout, "\n")
+	diffMap := make(map[string][]int)
 
-	for _, line := range output {
-		_ = parseRawOutput(string(line), diffDict)
+	for _, line := range stdoutLines {
+		if len(line) == 0 {
+			continue
+		}
+
+		if err = parseRawOutput(line, diffMap); err != nil {
+			return
+		}
 	}
 
-	conflicts := []Conflict{}
-
-	for fname := range diffDict {
-		if parsedConflicts, err := groupConflictOutput(fname, cmd.Dir, diffDict[fname]); err == nil {
-			for _, c := range parsedConflicts {
-				conflicts = append(conflicts, c)
-			}
+	for fname := range diffMap {
+		if groupedConflicts, err := groupConflictOutput(fname, dummyPath, diffMap[fname]); err == nil {
+			conflicts = append(conflicts, groupedConflicts...)
 		} else {
 			return nil, err
 		}
@@ -183,11 +177,11 @@ func Find() ([]Conflict, error) {
 
 	allFileLines = make(map[string][]string)
 	for i := range conflicts {
-		if err := conflicts[i].ExtractLines(); err != nil {
-			return nil, err
+		if err = conflicts[i].ExtractLines(); err != nil {
+			return
 		}
-		if err := conflicts[i].Highlight(); err != nil {
-			return nil, err
+		if err = conflicts[i].syntaxHighlight(); err != nil {
+			return
 		}
 	}
 
