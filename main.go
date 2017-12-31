@@ -112,5 +112,11 @@ func main() {
 	}
 
 	g.Close()
+
+	for fname := range allFileLines {
+		if err := WriteChanges(fname); err != nil {
+			fmt.Println(err)
+		}
+	}
 	printSummary()
 }

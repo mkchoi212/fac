@@ -49,3 +49,41 @@ func printSummary() {
 	}
 	fmt.Println(buf.String())
 }
+
+func conflictsIn(fname string) (list []Conflict) {
+	for _, c := range conflicts {
+		if c.AbsolutePath == fname && c.Choice != 0 {
+			list = append(list, c)
+		}
+	}
+	return
+}
+
+func WriteChanges(fname string) error {
+	targetConflicts := conflictsIn(fname)
+
+	var replacementLines []string
+
+	for _, c := range targetConflicts {
+		if c.Choice == Local {
+			replacementLines = append([]string{}, c.CurrentLines...)
+		} else {
+			replacementLines = append([]string{}, c.ForeignLines...)
+		}
+
+		i := 0
+		for ; i < len(replacementLines); i++ {
+			allFileLines[fname][c.Start+i-1] = replacementLines[i]
+		}
+		for ; c.End-c.Start >= i; i++ {
+			allFileLines[fname][c.Start+i-1] = ""
+		}
+	}
+
+	for _, l := range allFileLines[fname] {
+		if l != "" {
+			fmt.Println(l)
+		}
+	}
+	return nil
+}
