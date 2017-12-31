@@ -60,7 +60,7 @@ func parseInput(g *gocui.Gui, v *gocui.View) error {
 		}
 		if consecutiveError == 2 {
 			consecutiveError = 0
-			conflicts[cur].Select(g, false)
+			conflicts[cur].Select(g, true)
 		}
 	}
 
