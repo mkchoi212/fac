@@ -90,10 +90,10 @@ func main() {
 		switch err.(type) {
 		case *ErrNoConflict:
 			fmt.Println(Green(Regular, err.Error()))
-			return
 		default:
-			log.Panicln(err)
+			fmt.Print(Red(Regular, err.Error()))
 		}
+		return
 	}
 	conflictCount = len(conflicts)
 
