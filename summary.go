@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
+	"os"
 
 	"github.com/jroimartin/gocui"
 )
@@ -59,8 +61,25 @@ func conflictsIn(fname string) (list []Conflict) {
 	return
 }
 
-func WriteChanges(fname string) error {
-	targetConflicts := conflictsIn(fname)
+func writeChanges(absPath string) (err error) {
+	f, err := os.Create(absPath)
+	if err != nil {
+		return
+	}
+	defer f.Close()
+
+	w := bufio.NewWriter(f)
+	for _, line := range allFileLines[absPath] {
+		if _, err = w.WriteString(line); err != nil {
+			return
+		}
+	}
+	err = w.Flush()
+	return
+}
+
+func FinalizeChanges(absPath string) (err error) {
+	targetConflicts := conflictsIn(absPath)
 
 	var replacementLines []string
 
@@ -73,17 +92,15 @@ func WriteChanges(fname string) error {
 
 		i := 0
 		for ; i < len(replacementLines); i++ {
-			allFileLines[fname][c.Start+i-1] = replacementLines[i]
+			allFileLines[absPath][c.Start+i-1] = replacementLines[i]
 		}
 		for ; c.End-c.Start >= i; i++ {
-			allFileLines[fname][c.Start+i-1] = ""
+			allFileLines[absPath][c.Start+i-1] = ""
 		}
 	}
 
-	for _, l := range allFileLines[fname] {
-		if l != "" {
-			fmt.Printf(l)
-		}
+	if err = writeChanges(absPath); err != nil {
+		return
 	}
-	return nil
+	return
 }
