@@ -82,7 +82,7 @@ func WriteChanges(fname string) error {
 
 	for _, l := range allFileLines[fname] {
 		if l != "" {
-			fmt.Println(l)
+			fmt.Printf(l)
 		}
 	}
 	return nil

@@ -22,7 +22,7 @@ var (
 
 func printLines(v *gocui.View, lines []string) {
 	for _, line := range lines {
-		fmt.Fprintln(v, line)
+		fmt.Fprintf(v, line)
 	}
 }
 
