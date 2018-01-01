@@ -72,16 +72,18 @@ func makePanels(g *gocui.Gui) error {
 		}
 	}
 
-	if _, err := g.SetView(Current, x0, y0, x1, y1); err != nil {
+	if v, err := g.SetView(Current, x0, y0, x1, y1); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
+		v.Wrap = true
 	}
 
-	if _, err := g.SetView(Foreign, x2, y2, x3, y3); err != nil {
+	if v, err := g.SetView(Foreign, x2, y2, x3, y3); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
+		v.Wrap = true
 	}
 
 	return nil
@@ -142,7 +144,7 @@ func Select(c *conflict.Conflict, g *gocui.Gui, showHelp bool) error {
 		for idx, conflict := range conflict.All {
 			var out string
 			if conflict.Choice != 0 {
-				out = color.Green(color.Regular, "✅  %s:%d", conflict.FileName, conflict.Start)
+				out = color.Green(color.Regular, "✔ %s:%d", conflict.FileName, conflict.Start)
 			} else {
 				out = color.Red(color.Regular, "%d. %s:%d", idx+1, conflict.FileName, conflict.Start)
 			}
