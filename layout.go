@@ -230,7 +230,7 @@ func MoveToItem(dir int, g *gocui.Gui, v *gocui.View) error {
 		}
 	}
 
-	if originalCur == cur {
+	if originalCur == cur && conflict.All[cur].Choice != 0 {
 		globalQuit(g)
 	}
 
