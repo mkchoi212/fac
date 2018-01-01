@@ -10,13 +10,13 @@ import (
 	"strings"
 
 	"github.com/jroimartin/gocui"
+	"github.com/mkchoi212/fac/color"
+	"github.com/mkchoi212/fac/conflict"
 )
 
 var (
-	cur           = 0
-	conflictCount = 0
-	conflicts     = []Conflict{}
-
+	cur              = 0
+	conflictCount    = 0
 	consecutiveError = 0
 )
 
@@ -34,33 +34,33 @@ func parseInput(g *gocui.Gui, v *gocui.View) error {
 	evalCmd := func(in rune, g *gocui.Gui) {
 		switch {
 		case in == 'j':
-			scroll(g, &conflicts[cur], Up)
+			Scroll(g, &conflict.All[cur], Up)
 		case in == 'k':
-			scroll(g, &conflicts[cur], Down)
+			Scroll(g, &conflict.All[cur], Down)
 		case in == 'w':
-			conflicts[cur].topPeek++
-			conflicts[cur].Select(g, false)
+			conflict.All[cur].TopPeek++
+			Select(&conflict.All[cur], g, false)
 		case in == 's':
-			conflicts[cur].bottomPeek++
-			conflicts[cur].Select(g, false)
+			conflict.All[cur].BottomPeek++
+			Select(&conflict.All[cur], g, false)
 		case in == 'a':
-			conflicts[cur].Resolve(g, v, Local)
+			Resolve(&conflict.All[cur], g, v, Local)
 		case in == 'd':
-			conflicts[cur].Resolve(g, v, Incoming)
+			Resolve(&conflict.All[cur], g, v, Incoming)
 		case in == 'h' || in == '?':
-			conflicts[cur].Select(g, true)
+			Select(&conflict.All[cur], g, true)
 		case in == 'q':
 			globalQuit(g)
 		case in == 'z':
-			conflicts[cur].toggleDiff()
-			conflicts[cur].Select(g, false)
+			conflict.All[cur].ToggleDiff()
+			Select(&conflict.All[cur], g, false)
 		default:
-			printPrompt(g, Red(Regular, "[wasd] >>"))
+			PrintPrompt(g, color.Red(color.Regular, "[wasd] >>"))
 			consecutiveError++
 		}
 		if consecutiveError == 2 {
 			consecutiveError = 0
-			conflicts[cur].Select(g, true)
+			Select(&conflict.All[cur], g, true)
 		}
 	}
 
@@ -71,7 +71,7 @@ func parseInput(g *gocui.Gui, v *gocui.View) error {
 	if len(in) > 1 {
 		for _, r := range [...]rune{'a', 'd', 'h', 'z'} {
 			if strings.ContainsRune(in, r) {
-				printPrompt(g, Red(Regular, "[wasd] >>"))
+				PrintPrompt(g, color.Red(color.Regular, "[wasd] >>"))
 				return nil
 			}
 		}
@@ -84,18 +84,15 @@ func parseInput(g *gocui.Gui, v *gocui.View) error {
 }
 
 func main() {
-	var err error
-	conflicts, err = FindConflicts()
-	if err != nil {
+	if err := conflict.Find(); err != nil {
 		switch err.(type) {
-		case *ErrNoConflict:
-			fmt.Println(Green(Regular, err.Error()))
+		case *conflict.ErrNoConflict:
+			fmt.Println(color.Green(color.Regular, err.Error()))
 		default:
-			fmt.Print(Red(Regular, err.Error()))
+			fmt.Print(color.Red(color.Regular, err.Error()))
 		}
 		return
 	}
-	conflictCount = len(conflicts)
 
 	g, err := gocui.NewGui(gocui.OutputNormal)
 	if err != nil {
@@ -111,7 +108,7 @@ func main() {
 		log.Panic(err)
 	}
 
-	conflicts[0].Select(g, false)
+	Select(&conflict.All[0], g, false)
 
 	if err := g.MainLoop(); err != nil && err != gocui.ErrQuit {
 		log.Panicln(err)
@@ -119,9 +116,9 @@ func main() {
 
 	g.Close()
 
-	for fname := range allFileLines {
+	for fname := range conflict.FileLines {
 		if err := FinalizeChanges(fname); err != nil {
-			fmt.Println(Red(Highlight, "%s\n", err))
+			fmt.Println(color.Red(color.Underline, "%s\n", err))
 		}
 	}
 	printSummary()

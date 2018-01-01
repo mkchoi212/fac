@@ -15,6 +15,11 @@ const (
 	Panel   = "panel"
 	Prompt  = "prompt"
 	Input   = "input prompt"
+
+	Local    = 1
+	Incoming = 2
+	Up       = 3
+	Down     = 4
 )
 
 func layout(g *gocui.Gui) error {
@@ -47,7 +52,7 @@ func layout(g *gocui.Gui) error {
 			return err
 		}
 		v.Frame = false
-		prompt := Green(Regular, "[wasd] >>")
+		prompt := color.Green(color.Regular, "[wasd] >>")
 		v.Write([]byte(prompt))
 		v.MoveCursor(11, 0, true)
 	}
@@ -65,4 +70,112 @@ func layout(g *gocui.Gui) error {
 		}
 	}
 	return nil
+}
+
+func Select(c *conflict.Conflict, g *gocui.Gui, showHelp bool) error {
+	g.Update(func(g *gocui.Gui) error {
+		v, err := g.View(Panel)
+		if err != nil {
+			return err
+		}
+		v.Clear()
+
+		for idx, conflict := range conflict.All {
+			var out string
+			if conflict.Choice != 0 {
+				out = color.Green(color.Regular, "✅  %s:%d", conflict.FileName, conflict.Start)
+			} else {
+				out = color.Red(color.Regular, "%d. %s:%d", idx+1, conflict.FileName, conflict.Start)
+			}
+
+			if conflict.Equal(c) {
+				fmt.Fprintf(v, "%s <-\n", out)
+			} else {
+				fmt.Fprintf(v, "%s\n", out)
+			}
+		}
+
+		if showHelp {
+			printHelp(v)
+		}
+		return nil
+	})
+
+	g.Update(func(g *gocui.Gui) error {
+		v, err := g.View(Current)
+		if err != nil {
+			return err
+		}
+		var buf bytes.Buffer
+		buf.WriteString(c.CurrentName)
+		buf.WriteString(" (Current Change) ")
+		v.Title = buf.String()
+
+		top, bottom := c.PaddingLines()
+		v.Clear()
+		printLines(v, top)
+		if c.DisplayDiff {
+			printLines(v, c.Diff())
+		} else {
+			printLines(v, c.ColoredCurrentLines)
+		}
+		printLines(v, bottom)
+
+		v, err = g.View(Foreign)
+		if err != nil {
+			return err
+		}
+		buf.Reset()
+		buf.WriteString(c.ForeignName)
+		buf.WriteString(" (Incoming Change) ")
+		v.Title = buf.String()
+
+		top, bottom = c.PaddingLines()
+		v.Clear()
+		printLines(v, top)
+		printLines(v, c.ColoredForeignLines)
+		printLines(v, bottom)
+		return nil
+	})
+	return nil
+}
+
+func Resolve(c *conflict.Conflict, g *gocui.Gui, v *gocui.View, version int) error {
+	g.Update(func(g *gocui.Gui) error {
+		c.Choice = version
+		NextConflict(g, v)
+		return nil
+	})
+	return nil
+}
+
+func NextConflict(g *gocui.Gui, v *gocui.View) error {
+	originalCur := cur
+
+	for originalCur != cur {
+		cur++
+		if cur >= conflictCount {
+			cur = 0
+		}
+	}
+
+	if originalCur == cur {
+		globalQuit(g)
+	}
+
+	Select(&conflict.All[cur], g, false)
+	return nil
+}
+
+func Scroll(g *gocui.Gui, c *conflict.Conflict, direction int) {
+	if direction == Up {
+		c.TopPeek--
+		c.BottomPeek++
+	} else if direction == Down {
+		c.TopPeek++
+	} else {
+		return
+	}
+
+	Select(c, g, false)
 }

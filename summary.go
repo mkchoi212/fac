@@ -7,6 +7,8 @@ import (
 	"os"
 
 	"github.com/jroimartin/gocui"
+	"github.com/mkchoi212/fac/color"
+	"github.com/mkchoi212/fac/conflict"
 )
 
 func printHelp(v *gocui.View) {
@@ -23,42 +25,33 @@ func printHelp(v *gocui.View) {
 	h | ? - print help
 	q | Ctrl+c - quit
 	`
-	fmt.Fprintf(v, Blue(Regular, instruction))
+	fmt.Fprintf(v, color.Blue(color.Regular, instruction))
 }
 
 func printSummary() {
 	resolvedCnt := 0
 	var line string
 
-	for _, c := range conflicts {
+	for _, c := range conflict.All {
 		if c.Choice != 0 {
-			line = Green(Regular, "✔ %s: %d", c.FileName, c.Start)
+			line = color.Green(color.Regular, "✔ %s: %d", c.FileName, c.Start)
 			resolvedCnt++
 		} else {
-			line = Red(Regular, "✘ %s: %d", c.FileName, c.Start)
+			line = color.Red(color.Regular, "✘ %s: %d", c.FileName, c.Start)
 		}
 		fmt.Println(line)
 	}
 
 	var buf bytes.Buffer
-	if resolvedCnt != len(conflicts) {
+	if resolvedCnt != conflict.Count {
 		buf.WriteString("\nResolved ")
-		buf.WriteString(Red(Light, "%d ", resolvedCnt))
+		buf.WriteString(color.Red(color.Light, "%d ", resolvedCnt))
 		buf.WriteString("conflict(s) out of ")
-		buf.WriteString(Red(Light, "%d", len(conflicts)))
+		buf.WriteString(color.Red(color.Light, "%d", conflict.Count))
 	} else {
-		buf.WriteString(Green(Regular, "\nFixed All Conflicts 🎉"))
+		buf.WriteString(color.Green(color.Regular, "\nFixed All Conflicts 🎉"))
 	}
 	fmt.Println(buf.String())
-}
-
-func conflictsIn(fname string) (list []Conflict) {
-	for _, c := range conflicts {
-		if c.AbsolutePath == fname && c.Choice != 0 {
-			list = append(list, c)
-		}
-	}
-	return
 }
 
 func writeChanges(absPath string) (err error) {
@@ -69,7 +62,7 @@ func writeChanges(absPath string) (err error) {
 	defer f.Close()
 
 	w := bufio.NewWriter(f)
-	for _, line := range allFileLines[absPath] {
+	for _, line := range conflict.FileLines[absPath] {
 		if _, err = w.WriteString(line); err != nil {
 			return
 		}
@@ -79,7 +72,7 @@ func writeChanges(absPath string) (err error) {
 }
 
 func FinalizeChanges(absPath string) (err error) {
-	targetConflicts := conflictsIn(absPath)
+	targetConflicts := conflict.In(absPath)
 
 	var replacementLines []string
 
@@ -92,10 +85,10 @@ func FinalizeChanges(absPath string) (err error) {
 
 		i := 0
 		for ; i < len(replacementLines); i++ {
-			allFileLines[absPath][c.Start+i-1] = replacementLines[i]
+			conflict.FileLines[absPath][c.Start+i-1] = replacementLines[i]
 		}
 		for ; c.End-c.Start >= i; i++ {
-			allFileLines[absPath][c.Start+i-1] = ""
+			conflict.FileLines[absPath][c.Start+i-1] = ""
 		}
 	}
 
