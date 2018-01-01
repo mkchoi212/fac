@@ -113,7 +113,7 @@ func parseRawOutput(diff string, dict map[string][]int) error {
 	parts := strings.Split(diff, ":")
 
 	if len(parts) < 3 || !strings.Contains(diff, "marker") {
-		return errors.New("Could not parse line")
+		return nil
 	}
 
 	fname, lineData := string(parts[0]), parts[1]

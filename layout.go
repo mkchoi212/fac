@@ -176,6 +176,9 @@ func Select(c *conflict.Conflict, g *gocui.Gui, showHelp bool) error {
 			printLines(v, c.ColoredCurrentLines)
 		}
 		printLines(v, bottom)
+		if c.Choice == Local {
+			v.FgColor = gocui.ColorGreen
+		}
 
 		v, err = g.View(Foreign)
 		if err != nil {
@@ -188,6 +191,10 @@ func Select(c *conflict.Conflict, g *gocui.Gui, showHelp bool) error {
 		printLines(v, top)
 		printLines(v, c.ColoredForeignLines)
 		printLines(v, bottom)
+		if c.Choice == Incoming {
+			v.FgColor = gocui.ColorGreen
+		}
+
 		return nil
 	})
 	return nil
