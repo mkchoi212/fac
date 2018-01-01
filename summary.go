@@ -22,11 +22,12 @@ func printHelp(v *gocui.View) {
 	j - scroll down
 	k - scroll up
 
-	n - next conflict
-	p - previous conflict 
+	v - [v]iew orientation 
+	n - [n]ext conflict
+	p - [p]revious conflict 
 
-	h | ? - print help
-	q | Ctrl+c - quit
+	h | ? - [h]elp
+	q | Ctrl+c - [q]uit
 	`
 	fmt.Fprintf(v, color.Blue(color.Regular, instruction))
 }

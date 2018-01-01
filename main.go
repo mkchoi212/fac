@@ -50,6 +50,9 @@ func parseInput(g *gocui.Gui, v *gocui.View) error {
 			MoveToItem(Down, g, v)
 		case in == 'p':
 			MoveToItem(Up, g, v)
+		case in == 'v':
+			ViewOrientation = ^ViewOrientation
+			layout(g)
 		case in == 'h' || in == '?':
 			Select(&conflict.All[cur], g, true)
 		case in == 'q':

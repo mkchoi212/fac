@@ -20,25 +20,74 @@ const (
 	Incoming = 2
 	Up       = 3
 	Down     = 4
+
+	Horizontal = 5
+	Vertical   = -6
 )
 
-func layout(g *gocui.Gui) error {
+var (
+	ViewOrientation = Vertical
+	inputHeight     = 2
+)
+
+func layout(g *gocui.Gui) (err error) {
+	if err = makePanels(g); err != nil {
+		return
+	}
+
+	if err = makeOverviewPanel(g); err != nil {
+		return
+	}
+
+	if err = makePrompt(g); err != nil {
+		return
+	}
+	return
+}
+
+func makePanels(g *gocui.Gui) error {
 	maxX, maxY := g.Size()
-	inputHeight := 2
 	viewHeight := maxY - inputHeight
 	branchViewWidth := (maxX / 5) * 2
 
-	if _, err := g.SetView(Current, 0, 0, branchViewWidth, viewHeight); err != nil {
+	var x0, x1, y0, y1 int
+	var x2, x3, y2, y3 int
+
+	if ViewOrientation == Horizontal {
+		x0, x1 = 0, branchViewWidth
+		y0, y1 = 0, viewHeight
+		x2, x3 = branchViewWidth, branchViewWidth*2
+		y2, y3 = 0, viewHeight
+
+	} else {
+		branchViewWidth = branchViewWidth * 2
+		viewHeight = viewHeight / 2
+
+		x0, x1 = 0, branchViewWidth
+		y0, y1 = 0, viewHeight
+		x2, x3 = 0, branchViewWidth
+		y2, y3 = viewHeight, viewHeight*2
+	}
+
+	if _, err := g.SetView(Current, x0, y0, x1, y1); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
 	}
 
-	if _, err := g.SetView(Foreign, branchViewWidth, 0, branchViewWidth*2, viewHeight); err != nil {
+	if _, err := g.SetView(Foreign, x2, y2, x3, y3); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
 	}
+
+	return nil
+}
+
+func makeOverviewPanel(g *gocui.Gui) error {
+	maxX, maxY := g.Size()
+	viewHeight := maxY - inputHeight
+	branchViewWidth := (maxX / 5) * 2
 
 	if v, err := g.SetView(Panel, branchViewWidth*2, 0, maxX-2, viewHeight); err != nil {
 		if err != gocui.ErrUnknownView {
@@ -46,6 +95,13 @@ func layout(g *gocui.Gui) error {
 		}
 		v.Title = "Conflicts"
 	}
+	return nil
+}
+
+func makePrompt(g *gocui.Gui) error {
+	maxX, maxY := g.Size()
+	inputHeight := 2
+	viewHeight := maxY - inputHeight
 
 	if v, err := g.SetView(Prompt, 0, viewHeight, 14, viewHeight+inputHeight); err != nil {
 		if err != gocui.ErrUnknownView {
