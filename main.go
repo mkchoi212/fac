@@ -31,33 +31,33 @@ func quit(g *gocui.Gui, v *gocui.View) error {
 
 func parseInput(g *gocui.Gui, v *gocui.View) error {
 	evalCmd := func(in rune, g *gocui.Gui) {
-		switch {
-		case in == 'j':
+		switch in {
+		case 'j':
 			Scroll(g, &conflict.All[cur], Up)
-		case in == 'k':
+		case 'k':
 			Scroll(g, &conflict.All[cur], Down)
-		case in == 'w':
+		case 'w':
 			conflict.All[cur].TopPeek++
 			Select(&conflict.All[cur], g, false)
-		case in == 's':
+		case 's':
 			conflict.All[cur].BottomPeek++
 			Select(&conflict.All[cur], g, false)
-		case in == 'a':
+		case 'a':
 			Resolve(&conflict.All[cur], g, v, Local)
-		case in == 'd':
+		case 'd':
 			Resolve(&conflict.All[cur], g, v, Incoming)
-		case in == 'n':
+		case 'n':
 			MoveToItem(Down, g, v)
-		case in == 'p':
+		case 'p':
 			MoveToItem(Up, g, v)
-		case in == 'v':
+		case 'v':
 			ViewOrientation = ^ViewOrientation
 			layout(g)
-		case in == 'h' || in == '?':
+		case 'h', '?':
 			Select(&conflict.All[cur], g, true)
-		case in == 'q':
+		case 'q':
 			globalQuit(g)
-		// case in == 'z':
+		// case 'z':
 		//	conflict.All[cur].ToggleDiff()
 		//	Select(&conflict.All[cur], g, false)
 		default:
