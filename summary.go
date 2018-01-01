@@ -17,7 +17,6 @@ func printHelp(v *gocui.View) {
 	s - show more lines down
 	a - select left screen
 	d - select right screen
-	z - toggle diff
 
 	j - scroll down
 	k - scroll up

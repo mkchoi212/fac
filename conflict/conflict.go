@@ -1,10 +1,7 @@
 package conflict
 
 import (
-	"strings"
-
 	"github.com/mkchoi212/fac/color"
-	"github.com/sergi/go-diff/diffmatchpatch"
 )
 
 // Conflict represents a single conflict that may have occured
@@ -87,10 +84,4 @@ func In(fname string) (list []Conflict) {
 		}
 	}
 	return
-}
-
-func (c *Conflict) Diff() []string {
-	dmp := diffmatchpatch.New()
-	diffs := dmp.DiffMain(strings.Join(c.CurrentLines, ""), strings.Join(c.ForeignLines, ""), false)
-	return []string{dmp.DiffPrettyText(diffs)}
 }

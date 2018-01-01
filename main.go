@@ -57,9 +57,9 @@ func parseInput(g *gocui.Gui, v *gocui.View) error {
 			Select(&conflict.All[cur], g, true)
 		case in == 'q':
 			globalQuit(g)
-		case in == 'z':
-			conflict.All[cur].ToggleDiff()
-			Select(&conflict.All[cur], g, false)
+		// case in == 'z':
+		//	conflict.All[cur].ToggleDiff()
+		//	Select(&conflict.All[cur], g, false)
 		default:
 			PrintPrompt(g, color.Red(color.Regular, "[wasd] >>"))
 			consecutiveError++
