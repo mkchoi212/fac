@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 
 	"github.com/jroimartin/gocui"
@@ -49,6 +48,7 @@ func makePanels(g *gocui.Gui) error {
 	maxX, maxY := g.Size()
 	viewHeight := maxY - inputHeight
 	branchViewWidth := (maxX / 5) * 2
+	isOdd := maxY%2 == 1
 
 	var x0, x1, y0, y1 int
 	var x2, x3, y2, y3 int
@@ -61,12 +61,15 @@ func makePanels(g *gocui.Gui) error {
 
 	} else {
 		branchViewWidth = branchViewWidth * 2
-		viewHeight = viewHeight / 2
+		viewHeight = (maxY - inputHeight) / 2
 
 		x0, x1 = 0, branchViewWidth
 		y0, y1 = 0, viewHeight
 		x2, x3 = 0, branchViewWidth
 		y2, y3 = viewHeight, viewHeight*2
+		if isOdd {
+			y3++
+		}
 	}
 
 	if _, err := g.SetView(Current, x0, y0, x1, y1); err != nil {
@@ -162,10 +165,7 @@ func Select(c *conflict.Conflict, g *gocui.Gui, showHelp bool) error {
 		if err != nil {
 			return err
 		}
-		var buf bytes.Buffer
-		buf.WriteString(c.CurrentName)
-		buf.WriteString(" (Current Change) ")
-		v.Title = buf.String()
+		v.Title = fmt.Sprintf("%s %s", c.CurrentName, "(Local Version)")
 
 		top, bottom := c.PaddingLines()
 		v.Clear()
@@ -181,10 +181,7 @@ func Select(c *conflict.Conflict, g *gocui.Gui, showHelp bool) error {
 		if err != nil {
 			return err
 		}
-		buf.Reset()
-		buf.WriteString(c.ForeignName)
-		buf.WriteString(" (Incoming Change) ")
-		v.Title = buf.String()
+		v.Title = fmt.Sprintf("%s %s", c.ForeignName, "(Incoming Version)")
 
 		top, bottom = c.PaddingLines()
 		v.Clear()
