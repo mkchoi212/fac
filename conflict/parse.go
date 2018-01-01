@@ -145,8 +145,8 @@ func New(fname string, cwd string, lines []int) ([]Conflict, error) {
 }
 
 func Find() (err error) {
-	dummyPath := "/Users/mikechoi/src/CSCE-313/"
-	stdout, stderr, _ := RunCommand("git", dummyPath, "--no-pager", "diff", "--check")
+	cwd, _ := os.Getwd()
+	stdout, stderr, _ := RunCommand("git", cwd, "--no-pager", "diff", "--check")
 
 	if len(stderr) != 0 {
 		return errors.New(stderr)
@@ -168,7 +168,7 @@ func Find() (err error) {
 	}
 
 	for fname := range diffMap {
-		if out, err := New(fname, dummyPath, diffMap[fname]); err == nil {
+		if out, err := New(fname, cwd, diffMap[fname]); err == nil {
 			All = append(All, out...)
 		} else {
 			return err

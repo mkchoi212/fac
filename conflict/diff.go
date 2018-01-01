@@ -1,7 +1,9 @@
 package conflict
 
+import "os"
+
 func (c *Conflict) Diff() []string {
-	dummyPath := "/Users/mikechoi/src/CSCE-313/"
-	stdout, _, _ := RunCommand("git", dummyPath, "--no-pager", "diff", "--color")
+	cwd, _ := os.Getwd()
+	stdout, _, _ := RunCommand("git", cwd, "--no-pager", "diff", "--color")
 	return []string{stdout}
 }
