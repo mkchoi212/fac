@@ -1,7 +1,12 @@
 package main
 
 import (
+	"bytes"
+	"fmt"
+
 	"github.com/jroimartin/gocui"
+	"github.com/mkchoi212/fac/color"
+	"github.com/mkchoi212/fac/conflict"
 )
 
 const (
