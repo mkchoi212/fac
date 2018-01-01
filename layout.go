@@ -175,7 +175,7 @@ func Select(c *conflict.Conflict, g *gocui.Gui, showHelp bool) error {
 		if c.DisplayDiff {
 			printLines(v, c.Diff())
 		} else {
-			printLines(v, c.ColoredCurrentLines)
+			printLines(v, c.ColoredLocalLines)
 		}
 		printLines(v, bottom)
 		if c.Choice == Local {
@@ -191,7 +191,7 @@ func Select(c *conflict.Conflict, g *gocui.Gui, showHelp bool) error {
 		top, bottom = c.PaddingLines()
 		v.Clear()
 		printLines(v, top)
-		printLines(v, c.ColoredForeignLines)
+		printLines(v, c.ColoredIncomingLines)
 		printLines(v, bottom)
 		if c.Choice == Incoming {
 			v.FgColor = gocui.ColorGreen

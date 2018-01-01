@@ -13,10 +13,10 @@ type Conflict struct {
 	Middle       int
 	End          int
 
-	CurrentLines        []string
-	ForeignLines        []string
-	ColoredCurrentLines []string
-	ColoredForeignLines []string
+	LocalLines           []string
+	IncomingLines        []string
+	ColoredLocalLines    []string
+	ColoredIncomingLines []string
 
 	CurrentName string
 	ForeignName string

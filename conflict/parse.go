@@ -24,7 +24,7 @@ func (c *Conflict) SyntaxHighlight() error {
 	var lexer chroma.Lexer
 
 	if lexer = lexers.Match(c.FileName); lexer == nil {
-		for _, block := range [][]string{c.CurrentLines, c.ForeignLines} {
+		for _, block := range [][]string{c.LocalLines, c.IncomingLines} {
 			fmt.Print(strings.Join(block, "\n"))
 			if trial := lexers.Analyse(strings.Join(block, "")); trial != nil {
 				lexer = trial
@@ -35,8 +35,8 @@ func (c *Conflict) SyntaxHighlight() error {
 
 	if lexer == nil {
 		lexer = lexers.Fallback
-		c.ColoredCurrentLines = c.CurrentLines
-		c.ColoredForeignLines = c.ForeignLines
+		c.ColoredLocalLines = c.LocalLines
+		c.ColoredIncomingLines = c.IncomingLines
 		return nil
 	}
 
@@ -48,7 +48,7 @@ func (c *Conflict) SyntaxHighlight() error {
 	buf := new(bytes.Buffer)
 
 tokenizer:
-	for i, block := range [][]string{c.CurrentLines, c.ForeignLines} {
+	for i, block := range [][]string{c.LocalLines, c.IncomingLines} {
 		for _, line := range block {
 			if it, err = lexer.Tokenise(nil, line); err != nil {
 				break tokenizer
@@ -58,9 +58,9 @@ tokenizer:
 			}
 
 			if i == 0 {
-				c.ColoredCurrentLines = append(c.ColoredCurrentLines, buf.String())
+				c.ColoredLocalLines = append(c.ColoredLocalLines, buf.String())
 			} else {
-				c.ColoredForeignLines = append(c.ColoredForeignLines, buf.String())
+				c.ColoredIncomingLines = append(c.ColoredIncomingLines, buf.String())
 			}
 			buf.Reset()
 		}
@@ -102,8 +102,8 @@ func (c *Conflict) ExtractLines() error {
 	}
 
 	lines, _ = FileLines[c.AbsolutePath]
-	c.CurrentLines = lines[c.Start : c.Middle-1]
-	c.ForeignLines = lines[c.Middle : c.End-1]
+	c.LocalLines = lines[c.Start : c.Middle-1]
+	c.IncomingLines = lines[c.Middle : c.End-1]
 	c.CurrentName = strings.Split(lines[c.Start-1], " ")[1]
 	c.ForeignName = strings.Split(lines[c.End-1], " ")[1]
 	return nil

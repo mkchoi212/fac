@@ -81,9 +81,9 @@ func FinalizeChanges(absPath string) (err error) {
 
 	for _, c := range targetConflicts {
 		if c.Choice == Local {
-			replacementLines = append([]string{}, c.CurrentLines...)
+			replacementLines = append([]string{}, c.LocalLines...)
 		} else {
-			replacementLines = append([]string{}, c.ForeignLines...)
+			replacementLines = append([]string{}, c.IncomingLines...)
 		}
 
 		i := 0
