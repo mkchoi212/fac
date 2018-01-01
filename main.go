@@ -46,6 +46,10 @@ func parseInput(g *gocui.Gui, v *gocui.View) error {
 			Resolve(&conflict.All[cur], g, v, Local)
 		case in == 'd':
 			Resolve(&conflict.All[cur], g, v, Incoming)
+		case in == 'n':
+			MoveToItem(Down, g, v)
+		case in == 'p':
+			MoveToItem(Up, g, v)
 		case in == 'h' || in == '?':
 			Select(&conflict.All[cur], g, true)
 		case in == 'q':

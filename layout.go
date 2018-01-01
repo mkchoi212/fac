@@ -143,19 +143,30 @@ func Select(c *conflict.Conflict, g *gocui.Gui, showHelp bool) error {
 func Resolve(c *conflict.Conflict, g *gocui.Gui, v *gocui.View, version int) error {
 	g.Update(func(g *gocui.Gui) error {
 		c.Choice = version
-		NextConflict(g, v)
+		MoveToItem(Down, g, v)
 		return nil
 	})
 	return nil
 }
 
-func NextConflict(g *gocui.Gui, v *gocui.View) error {
+func MoveToItem(dir int, g *gocui.Gui, v *gocui.View) error {
 	originalCur := cur
 
-	for originalCur != cur {
-		cur++
+	for {
+		if dir == Up {
+			cur--
+		} else {
+			cur++
+		}
+
 		if cur >= conflict.Count {
 			cur = 0
+		} else if cur < 0 {
+			cur = conflict.Count - 1
+		}
+
+		if conflict.All[cur].Choice == 0 || originalCur == cur {
+			break
 		}
 	}
 

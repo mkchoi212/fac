@@ -22,6 +22,9 @@ func printHelp(v *gocui.View) {
 	j - scroll down
 	k - scroll up
 
+	n - next conflict
+	p - previous conflict 
+
 	h | ? - print help
 	q | Ctrl+c - quit
 	`
