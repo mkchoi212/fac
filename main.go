@@ -16,7 +16,6 @@ import (
 
 var (
 	cur              = 0
-	conflictCount    = 0
 	consecutiveError = 0
 )
 

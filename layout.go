@@ -154,7 +154,7 @@ func NextConflict(g *gocui.Gui, v *gocui.View) error {
 
 	for originalCur != cur {
 		cur++
-		if cur >= conflictCount {
+		if cur >= conflict.Count {
 			cur = 0
 		}
 	}
