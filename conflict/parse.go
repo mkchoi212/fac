@@ -1,4 +1,4 @@
-package main
+package conflict
 
 import (
 	"bufio"
@@ -18,9 +18,9 @@ import (
 	"github.com/alecthomas/chroma/styles"
 )
 
-var allFileLines map[string][]string
+var FileLines map[string][]string
 
-func (c *Conflict) syntaxHighlight() error {
+func (c *Conflict) SyntaxHighlight() error {
 	var lexer chroma.Lexer
 
 	if lexer = lexers.Match(c.FileName); lexer == nil {
@@ -80,7 +80,7 @@ func ReadFile(absPath string) error {
 	for {
 		data, err := r.ReadBytes('\n')
 		if err == nil || err == io.EOF {
-			allFileLines[absPath] = append(allFileLines[absPath], string(data))
+			FileLines[absPath] = append(FileLines[absPath], string(data))
 		}
 
 		if err != nil {
@@ -94,14 +94,14 @@ func ReadFile(absPath string) error {
 }
 
 func (c *Conflict) ExtractLines() error {
-	lines, ok := allFileLines[c.AbsolutePath]
+	lines, ok := FileLines[c.AbsolutePath]
 	if !ok {
 		if err := ReadFile(c.AbsolutePath); err != nil {
 			log.Panic(err)
 		}
 	}
 
-	lines, _ = allFileLines[c.AbsolutePath]
+	lines, _ = FileLines[c.AbsolutePath]
 	c.CurrentLines = lines[c.Start : c.Middle-1]
 	c.ForeignLines = lines[c.Middle : c.End-1]
 	c.CurrentName = strings.Split(lines[c.Start-1], " ")[1]
@@ -125,7 +125,7 @@ func parseRawOutput(diff string, dict map[string][]int) error {
 	return nil
 }
 
-func CreateConflictStructs(fname string, cwd string, lines []int) ([]Conflict, error) {
+func New(fname string, cwd string, lines []int) ([]Conflict, error) {
 	if len(lines)%3 != 0 {
 		return nil, errors.New("Invalid number of remaining conflict markers")
 	}
@@ -144,14 +144,14 @@ func CreateConflictStructs(fname string, cwd string, lines []int) ([]Conflict, e
 	return parsedConflicts, nil
 }
 
-func FindConflicts() (conflicts []Conflict, err error) {
+func Find() (err error) {
 	dummyPath := "/Users/mikechoi/src/CSCE-313/"
 	stdout, stderr, _ := RunCommand("git", dummyPath, "--no-pager", "diff", "--check")
 
 	if len(stderr) != 0 {
-		return nil, errors.New(stderr)
+		return errors.New(stderr)
 	} else if len(stdout) == 0 {
-		return nil, NewErrNoConflict("No conflicts detected 🎉")
+		return NewErrNoConflict("No conflicts detected 🎉")
 	}
 
 	stdoutLines := strings.Split(stdout, "\n")
@@ -168,22 +168,23 @@ func FindConflicts() (conflicts []Conflict, err error) {
 	}
 
 	for fname := range diffMap {
-		if out, err := CreateConflictStructs(fname, dummyPath, diffMap[fname]); err == nil {
-			conflicts = append(conflicts, out...)
+		if out, err := New(fname, dummyPath, diffMap[fname]); err == nil {
+			All = append(All, out...)
 		} else {
-			return nil, err
+			return err
 		}
 	}
 
-	allFileLines = make(map[string][]string)
-	for i := range conflicts {
-		if err = conflicts[i].ExtractLines(); err != nil {
+	FileLines = make(map[string][]string)
+	for i := range All {
+		if err = All[i].ExtractLines(); err != nil {
 			return
 		}
-		if err = conflicts[i].syntaxHighlight(); err != nil {
+		if err = All[i].SyntaxHighlight(); err != nil {
 			return
 		}
 	}
 
-	return conflicts, nil
+	Count = len(All)
+	return nil
 }
