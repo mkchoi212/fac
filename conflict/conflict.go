@@ -44,7 +44,7 @@ func (e *ErrNoConflict) Error() string {
 }
 
 func (c *Conflict) Equal(c2 *Conflict) bool {
-	return c.FileName == c2.FileName && c.Start == c2.Start
+	return c.AbsolutePath == c2.AbsolutePath && c.Start == c2.Start
 }
 
 func (c *Conflict) ToggleDiff() {
