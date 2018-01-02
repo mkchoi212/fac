@@ -14,7 +14,6 @@ brew:
     owner: mkchoi212
     name: fac
 
-  folder: assets
   homepage: "https://github.com/mkchoi212/fac"
   description: "Command line User Interface for fixing git conflicts"
   dependencies:
