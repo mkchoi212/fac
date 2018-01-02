@@ -20,6 +20,12 @@ Execute:
 $ go get github.com/mkchoi212/fac
 ```
 
+Or using [Homebrew 🍺](https://brew.sh)
+
+```bash
+brew tap mkchoi212/fac https://github.com/mkchoi212/fac.git
+```
+
 ## Using
 
 `fac` operates much like `git add -p` . It has a prompt input at the bottom of the screen where the user inputs various commands.
