@@ -35,8 +35,8 @@ The commands have been preset to the following specifications
 ```
 w - show more lines up
 s - show more lines down
-a - select left screen
-d - select right screen
+a - use local version
+d - use incoming version
 
 j - scroll down
 k - scroll up

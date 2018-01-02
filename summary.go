@@ -15,15 +15,15 @@ func printHelp(v *gocui.View) {
 	instruction := `
 	w - show more lines up
 	s - show more lines down
-	a - select left screen
-	d - select right screen
+	a - use local version
+	d - use incoming version
 
 	j - scroll down
 	k - scroll up
 
-	v - [v]iew orientation 
+	v - [v]iew orientation
 	n - [n]ext conflict
-	p - [p]revious conflict 
+	p - [p]revious conflict
 
 	h | ? - [h]elp
 	q | Ctrl+c - [q]uit
