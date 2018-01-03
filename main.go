@@ -98,7 +98,7 @@ func main() {
 		case *conflict.ErrNoConflict:
 			fmt.Println(color.Green(color.Regular, err.Error()))
 		default:
-			fmt.Print(color.Red(color.Regular, err.Error()))
+			fmt.Println(color.Red(color.Regular, err.Error()))
 		}
 		return
 	}
