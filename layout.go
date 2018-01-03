@@ -150,7 +150,7 @@ func Select(c *conflict.Conflict, g *gocui.Gui, showHelp bool) error {
 			}
 
 			if conflict.Equal(c) {
-				fmt.Fprintf(v, "%s <-\n", out)
+				fmt.Fprintf(v, "-> %s\n", out)
 			} else {
 				fmt.Fprintf(v, "%s\n", out)
 			}
