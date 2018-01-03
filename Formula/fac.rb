@@ -3,7 +3,7 @@ class Fac < Formula
   homepage "https://github.com/mkchoi212/fac"
   url "https://github.com/mkchoi212/fac/releases/download/v1.0.1/fac_1.0.1_darwin_amd64.tar.gz"
   version "1.0.1"
-  sha256 "ea28679d1246c9c75047eae4c4d1ce3705e5bb42458dabe8faea9861aea6f441"
+  sha256 "f64e25dae39e9eb160afe225754b345e850489f7dcab707bc513311d7098d59a"
   
   depends_on "git"
   depends_on "go"
