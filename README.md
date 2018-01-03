@@ -24,6 +24,7 @@ Or using [Homebrew 🍺](https://brew.sh)
 
 ```bash
 brew tap mkchoi212/fac https://github.com/mkchoi212/fac.git
+brew install fac
 ```
 
 ## Using
