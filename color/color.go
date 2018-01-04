@@ -5,19 +5,19 @@ import (
 )
 
 const (
-	FgBlack  = 0
-	FgRed    = 1
-	FgGreen  = 2
-	FgYellow = 3
-	FgBlue   = 4
-	FgPurple = 5
+	FgBlack = iota
+	FgRed
+	FgGreen
+	FgYellow
+	FgBlue
+	FgPurple
 )
 
 const (
-	Regular   = 1
-	Light     = 2
-	Highlight = 3
-	Underline = 4
+	Regular = iota + 1
+	Light
+	Highlight
+	Underline
 )
 
 func colorString(color int, style int, format string, a ...interface{}) string {
