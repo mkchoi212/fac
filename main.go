@@ -60,14 +60,14 @@ func parseInput(g *gocui.Gui, v *gocui.View) error {
 		default:
 			PrintPrompt(g, style.Red("[wasd] >>"))
 			consecutiveError++
+			if consecutiveError == 2 {
+				consecutiveError = 0
+				Select(&conflict.All[cur], g, true)
+			}
 			return
 		}
+		consecutiveError = 0
 		PrintPrompt(g, style.Green("[wasd] >>"))
-
-		if consecutiveError == 2 {
-			consecutiveError = 0
-			Select(&conflict.All[cur], g, true)
-		}
 	}
 
 	in := strings.TrimSuffix(v.Buffer(), "\n")
