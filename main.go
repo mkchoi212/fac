@@ -10,8 +10,8 @@ import (
 	"strings"
 
 	"github.com/jroimartin/gocui"
-	"github.com/mkchoi212/fac/color"
 	"github.com/mkchoi212/fac/conflict"
+	"github.com/mkchoi212/fac/style"
 )
 
 var (
@@ -61,11 +61,11 @@ func parseInput(g *gocui.Gui, v *gocui.View) error {
 		//	conflict.All[cur].ToggleDiff()
 		//	Select(&conflict.All[cur], g, false)
 		default:
-			PrintPrompt(g, color.Red(color.Regular, "[wasd] >>"))
+			PrintPrompt(g, style.Red("[wasd] >>"))
 			consecutiveError++
 			return
 		}
-		PrintPrompt(g, color.Green(color.Regular, "[wasd] >>"))
+		PrintPrompt(g, style.Green("[wasd] >>"))
 
 		if consecutiveError == 2 {
 			consecutiveError = 0
@@ -80,7 +80,7 @@ func parseInput(g *gocui.Gui, v *gocui.View) error {
 	if len(in) > 1 {
 		for _, r := range [...]rune{'a', 'd', 'h', 'z'} {
 			if strings.ContainsRune(in, r) {
-				PrintPrompt(g, color.Red(color.Regular, "[wasd] >>"))
+				PrintPrompt(g, style.Red("[wasd] >>"))
 				return nil
 			}
 		}
@@ -96,9 +96,9 @@ func main() {
 	if err := conflict.Find(); err != nil {
 		switch err.(type) {
 		case *conflict.ErrNoConflict:
-			fmt.Println(color.Green(color.Regular, err.Error()))
+			fmt.Println(style.Green(err.Error()))
 		default:
-			fmt.Println(color.Red(color.Regular, err.Error()))
+			fmt.Println(style.Red(err.Error()))
 		}
 		return
 	}
@@ -127,7 +127,7 @@ func main() {
 
 	for fname := range conflict.FileLines {
 		if err := FinalizeChanges(fname); err != nil {
-			fmt.Println(color.Red(color.Underline, "%s\n", err))
+			fmt.Println(style.Red("%s\n", err))
 		}
 	}
 	printSummary()

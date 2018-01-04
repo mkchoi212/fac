@@ -7,8 +7,8 @@ import (
 	"os"
 
 	"github.com/jroimartin/gocui"
-	"github.com/mkchoi212/fac/color"
 	"github.com/mkchoi212/fac/conflict"
+	"github.com/mkchoi212/fac/style"
 )
 
 func printHelp(v *gocui.View) {
@@ -28,7 +28,7 @@ func printHelp(v *gocui.View) {
 	h | ? - [h]elp
 	q | Ctrl+c - [q]uit
 	`
-	fmt.Fprintf(v, color.Blue(color.Regular, instruction))
+	fmt.Fprintf(v, style.Blue(instruction))
 }
 
 func printSummary() {
@@ -37,10 +37,10 @@ func printSummary() {
 
 	for _, c := range conflict.All {
 		if c.Choice != 0 {
-			line = color.Green(color.Regular, "✔ %s: %d", c.FileName, c.Start)
+			line = style.Green("✔ %s: %d", c.FileName, c.Start)
 			resolvedCnt++
 		} else {
-			line = color.Red(color.Regular, "✘ %s: %d", c.FileName, c.Start)
+			line = style.Red("✘ %s: %d", c.FileName, c.Start)
 		}
 		fmt.Println(line)
 	}
@@ -48,11 +48,11 @@ func printSummary() {
 	var buf bytes.Buffer
 	if resolvedCnt != conflict.Count {
 		buf.WriteString("\nResolved ")
-		buf.WriteString(color.Red(color.Light, "%d ", resolvedCnt))
+		buf.WriteString(style.RedLight("%d ", resolvedCnt))
 		buf.WriteString("conflict(s) out of ")
-		buf.WriteString(color.Red(color.Light, "%d", conflict.Count))
+		buf.WriteString(style.RedLight("%d", conflict.Count))
 	} else {
-		buf.WriteString(color.Green(color.Regular, "\nFixed All Conflicts 🎉"))
+		buf.WriteString(style.Green("\nFixed All Conflicts 🎉"))
 	}
 	fmt.Println(buf.String())
 }

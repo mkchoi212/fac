@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/jroimartin/gocui"
-	"github.com/mkchoi212/fac/color"
 	"github.com/mkchoi212/fac/conflict"
+	"github.com/mkchoi212/fac/style"
 )
 
 const (
@@ -113,7 +113,7 @@ func makePrompt(g *gocui.Gui) error {
 			return err
 		}
 		v.Frame = false
-		prompt := color.Green(color.Regular, "[wasd] >>")
+		prompt := style.Green("[wasd] >>")
 		v.Write([]byte(prompt))
 		v.MoveCursor(11, 0, true)
 	}
@@ -144,9 +144,9 @@ func Select(c *conflict.Conflict, g *gocui.Gui, showHelp bool) error {
 		for idx, conflict := range conflict.All {
 			var out string
 			if conflict.Choice != 0 {
-				out = color.Green(color.Regular, "✔ %s:%d", conflict.FileName, conflict.Start)
+				out = style.Green("✔ %s:%d", conflict.FileName, conflict.Start)
 			} else {
-				out = color.Red(color.Regular, "%d. %s:%d", idx+1, conflict.FileName, conflict.Start)
+				out = style.Red("%d. %s:%d", idx+1, conflict.FileName, conflict.Start)
 			}
 
 			if conflict.Equal(c) {
@@ -172,15 +172,8 @@ func Select(c *conflict.Conflict, g *gocui.Gui, showHelp bool) error {
 		top, bottom := c.PaddingLines()
 		v.Clear()
 		printLines(v, top)
-		if c.DisplayDiff {
-			printLines(v, c.Diff())
-		} else {
-			printLines(v, c.ColoredLocalLines)
-		}
+		printLines(v, c.ColoredLocalLines)
 		printLines(v, bottom)
-		if c.Choice == Local {
-			v.FgColor = gocui.ColorGreen
-		}
 
 		v, err = g.View(Foreign)
 		if err != nil {
@@ -193,9 +186,6 @@ func Select(c *conflict.Conflict, g *gocui.Gui, showHelp bool) error {
 		printLines(v, top)
 		printLines(v, c.ColoredIncomingLines)
 		printLines(v, bottom)
-		if c.Choice == Incoming {
-			v.FgColor = gocui.ColorGreen
-		}
 
 		return nil
 	})

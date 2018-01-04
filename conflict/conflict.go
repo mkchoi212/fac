@@ -1,7 +1,7 @@
 package conflict
 
 import (
-	"github.com/mkchoi212/fac/color"
+	"github.com/mkchoi212/fac/style"
 )
 
 // Conflict represents a single conflict that may have occured
@@ -62,7 +62,7 @@ func (c *Conflict) PaddingLines() (topPadding, bottomPadding []string) {
 	}
 
 	for _, l := range lines[start-c.TopPeek : start] {
-		topPadding = append(topPadding, color.Black(color.Regular, l))
+		topPadding = append(topPadding, style.CUIGrey(l))
 	}
 
 	if c.BottomPeek >= len(lines)-c.End {
@@ -72,7 +72,7 @@ func (c *Conflict) PaddingLines() (topPadding, bottomPadding []string) {
 	}
 
 	for _, l := range lines[end : end+c.BottomPeek] {
-		bottomPadding = append(bottomPadding, color.Black(color.Regular, l))
+		bottomPadding = append(bottomPadding, style.CUIGrey(l))
 	}
 	return
 }
