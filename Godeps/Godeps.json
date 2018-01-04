@@ -55,10 +55,6 @@
 		{
 			"ImportPath": "github.com/nsf/termbox-go",
 			"Rev": "aa4a75b1c20a2b03751b1a9f7e41d58bd6f71c43"
-		},
-		{
-			"ImportPath": "github.com/sergi/go-diff/diffmatchpatch",
-			"Rev": "1744e2970ca51c86172c8190fadad617561ed6e7"
 		}
 	]
 }
