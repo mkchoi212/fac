@@ -27,7 +27,7 @@ brew tap mkchoi212/fac https://github.com/mkchoi212/fac.git
 brew install fac
 ```
 
-## Using
+## 🔧 Using
 
 `fac` operates much like `git add -p` . It has a prompt input at the bottom of the screen where the user inputs various commands.
 
@@ -42,9 +42,9 @@ d - use incoming version
 j - scroll down
 k - scroll up
 
-v - [v]iew orientation 
+v - [v]iew orientation
 n - [n]ext conflict
-p - [p]revious conflict 
+p - [p]revious conflict
 
 h | ? - [h]elp
 q | Ctrl+c - [q]uit
@@ -54,7 +54,7 @@ q | Ctrl+c - [q]uit
 
 
 
-> The movement controls have been derived from both the world of gamers (WASD) and VIM users (HJKL). 
+> The movement controls have been derived from both the world of gamers (WASD) and VIM users (HJKL).
 
 ## ✋ Contributing
 
