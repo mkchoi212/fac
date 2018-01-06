@@ -108,17 +108,19 @@ func makePrompt(g *gocui.Gui) error {
 	inputHeight := 2
 	viewHeight := maxY - inputHeight
 
-	if v, err := g.SetView(Prompt, 0, viewHeight, 14, viewHeight+inputHeight); err != nil {
+	// Instruction View
+	if v, err := g.SetView(Prompt, 0, viewHeight, 19, viewHeight+inputHeight); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
 		v.Frame = false
-		prompt := color.Green(color.Regular, "[wasd] >>")
+		prompt := color.Green(color.Regular, promptString)
 		v.Write([]byte(prompt))
 		v.MoveCursor(11, 0, true)
 	}
 
-	if v, err := g.SetView(Input, 10, viewHeight, maxX, viewHeight+inputHeight); err != nil {
+	// Input View
+	if v, err := g.SetView(Input, 15, viewHeight, maxX, viewHeight+inputHeight); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
