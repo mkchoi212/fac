@@ -6,6 +6,8 @@ import (
 	"github.com/jroimartin/gocui"
 )
 
+var promptString = "[w,a,s,d,?] >>"
+
 func promptEditor(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifier) {
 	switch {
 	case ch != 0 && mod == 0:

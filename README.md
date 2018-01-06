@@ -49,7 +49,7 @@ p - [p]revious conflict
 h | ? - [h]elp
 q | Ctrl+c - [q]uit
 
-[wasd] >> [INPUT HERE]
+[w,a,s,d,?] >> [INPUT HERE]
 ```
 
 
