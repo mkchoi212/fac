@@ -175,6 +175,11 @@ func Find() (err error) {
 		}
 	}
 
+	Count = len(All)
+	if Count == 0 {
+		return NewErrNoConflict("No conflicts detected 🎉")
+	}
+
 	FileLines = make(map[string][]string)
 	for i := range All {
 		if err = All[i].ExtractLines(); err != nil {
@@ -185,6 +190,5 @@ func Find() (err error) {
 		}
 	}
 
-	Count = len(All)
 	return nil
 }
