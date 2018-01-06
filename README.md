@@ -29,6 +29,8 @@ brew install fac
 
 ## 🔧 Using
 
+> **Please note fac does NOT support diff3 merge conflict outputs yet!**
+
 `fac` operates much like `git add -p` . It has a prompt input at the bottom of the screen where the user inputs various commands.
 
 The commands have been preset to the following specifications
@@ -51,8 +53,6 @@ q | Ctrl+c - [q]uit
 
 [w,a,s,d,?] >> [INPUT HERE]
 ```
-
-
 
 > The movement controls have been derived from both the world of gamers (WASD) and VIM users (HJKL).
 
