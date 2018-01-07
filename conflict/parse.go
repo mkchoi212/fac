@@ -20,7 +20,7 @@ import (
 
 var FileLines map[string][]string
 
-func (c *Conflict) SyntaxHighlight() error {
+func (c *Conflict) HighlightSyntax() error {
 	var lexer chroma.Lexer
 
 	if lexer = lexers.Match(c.FileName); lexer == nil {
@@ -185,7 +185,7 @@ func Find() (err error) {
 		if err = All[i].ExtractLines(); err != nil {
 			return
 		}
-		if err = All[i].SyntaxHighlight(); err != nil {
+		if err = All[i].HighlightSyntax(); err != nil {
 			return
 		}
 	}
