@@ -245,7 +245,6 @@ func MoveToItem(dir int, g *gocui.Gui, v *gocui.View) error {
 func Scroll(g *gocui.Gui, c *conflict.Conflict, direction int) {
 	if direction == Up {
 		c.TopPeek--
-		c.BottomPeek++
 	} else if direction == Down {
 		c.TopPeek++
 	} else {
