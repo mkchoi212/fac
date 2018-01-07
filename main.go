@@ -18,6 +18,7 @@ var (
 	cur              = 0
 	consecutiveError = 0
 )
+var g *gocui.Gui
 
 func printLines(v *gocui.View, lines []string) {
 	for _, line := range lines {
@@ -29,7 +30,7 @@ func quit(g *gocui.Gui, v *gocui.View) error {
 	return gocui.ErrQuit
 }
 
-func parseInput(g *gocui.Gui, v *gocui.View) error {
+func parseInput(v *gocui.View) error {
 	evalCmd := func(in rune, g *gocui.Gui) {
 		switch in {
 		case 'j':
@@ -71,8 +72,6 @@ func parseInput(g *gocui.Gui, v *gocui.View) error {
 	}
 
 	in := strings.TrimSuffix(v.Buffer(), "\n")
-	v.Clear()
-	v.SetCursor(0, 0)
 
 	if len(in) > 1 {
 		for _, r := range [...]rune{'a', 'd', 'h', 'z'} {
@@ -90,7 +89,8 @@ func parseInput(g *gocui.Gui, v *gocui.View) error {
 }
 
 func main() {
-	if err := conflict.Find(); err != nil {
+	var err error
+	if err = conflict.Find(); err != nil {
 		switch err.(type) {
 		case *conflict.ErrNoConflict:
 			fmt.Println(color.Green(color.Regular, err.Error()))
@@ -100,7 +100,7 @@ func main() {
 		return
 	}
 
-	g, err := gocui.NewGui(gocui.OutputNormal)
+	g, err = gocui.NewGui(gocui.OutputNormal)
 	if err != nil {
 		log.Panicln(err)
 	}
@@ -108,9 +108,6 @@ func main() {
 	g.Cursor = true
 
 	if err := g.SetKeybinding("", gocui.KeyCtrlC, gocui.ModNone, quit); err != nil {
-		log.Panic(err)
-	}
-	if err := g.SetKeybinding("", gocui.KeyEnter, gocui.ModNone, parseInput); err != nil {
 		log.Panic(err)
 	}
 

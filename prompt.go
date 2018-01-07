@@ -11,7 +11,10 @@ var promptString = "[w,a,s,d,?] >>"
 func promptEditor(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifier) {
 	switch {
 	case ch != 0 && mod == 0:
+		v.Clear()
 		v.EditWrite(ch)
+		parseInput(v)
+		v.SetCursor(0, 0)
 	case key == gocui.KeySpace:
 		v.EditWrite(' ')
 	case key == gocui.KeyBackspace || key == gocui.KeyBackspace2:
