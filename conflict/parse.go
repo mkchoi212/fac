@@ -94,14 +94,7 @@ func ReadFile(absPath string) error {
 }
 
 func (c *Conflict) ExtractLines() error {
-	lines, ok := FileLines[c.AbsolutePath]
-	if !ok {
-		if err := ReadFile(c.AbsolutePath); err != nil {
-			log.Panic(err)
-		}
-	}
-
-	lines, _ = FileLines[c.AbsolutePath]
+	lines := FileLines[c.AbsolutePath]
 	c.LocalLines = lines[c.Start : c.Middle-1]
 	c.IncomingLines = lines[c.Middle : c.End-1]
 	c.CurrentName = strings.Split(lines[c.Start-1], " ")[1]
@@ -125,7 +118,17 @@ func parseRawOutput(diff string, dict map[string][]int) error {
 	return nil
 }
 
-func New(fname string, cwd string, lines []int) ([]Conflict, error) {
+func New(absPath string, lines []int) ([]Conflict, error) {
+	// Check for diff3 output before parsing
+	for _, line := range FileLines[absPath] {
+		if strings.Contains(line, "||||||| merged common ancestors") {
+			return nil, errors.New(`fac does not support diff3 styled outputs yet 😞
+Run below command to change to a compatible conflict style
+
+>> git config --global merge.conflictstyle merge`)
+		}
+	}
+
 	if len(lines)%3 != 0 {
 		return nil, errors.New("Invalid number of remaining conflict markers")
 	}
@@ -136,8 +139,8 @@ func New(fname string, cwd string, lines []int) ([]Conflict, error) {
 		conf.Start = lines[i]
 		conf.Middle = lines[i+1]
 		conf.End = lines[i+2]
-		conf.FileName = fname
-		conf.AbsolutePath = path.Join(cwd, fname)
+		conf.AbsolutePath = absPath
+		_, conf.FileName = path.Split(absPath)
 		parsedConflicts = append(parsedConflicts, conf)
 	}
 
@@ -156,6 +159,7 @@ func Find() (err error) {
 
 	stdoutLines := strings.Split(stdout, "\n")
 	diffMap := make(map[string][]int)
+	FileLines = make(map[string][]string)
 
 	for _, line := range stdoutLines {
 		if len(line) == 0 {
@@ -168,8 +172,12 @@ func Find() (err error) {
 	}
 
 	for fname := range diffMap {
-		if out, err := New(fname, cwd, diffMap[fname]); err == nil {
-			All = append(All, out...)
+		absPath := path.Join(cwd, fname)
+		if err = ReadFile(absPath); err != nil {
+			return
+		}
+		if conflicts, err := New(absPath, diffMap[fname]); err == nil {
+			All = append(All, conflicts...)
 		} else {
 			return err
 		}
@@ -180,7 +188,6 @@ func Find() (err error) {
 		return NewErrNoConflict("No conflicts detected 🎉")
 	}
 
-	FileLines = make(map[string][]string)
 	for i := range All {
 		if err = All[i].ExtractLines(); err != nil {
 			return
