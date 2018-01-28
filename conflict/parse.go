@@ -149,7 +149,16 @@ Run below command to change to a compatible conflict style
 
 func Find() (err error) {
 	cwd, _ := os.Getwd()
-	stdout, stderr, _ := RunCommand("git", cwd, "--no-pager", "diff", "--check")
+
+	stdout, stderr, _ := RunCommand("git", cwd, "rev-parse", "--show-toplevel")
+	if len(stderr) != 0 {
+		return errors.New(stderr)
+	} else if len(stdout) == 0 {
+		return errors.New("no git top-level path")
+	}
+	topLevelPath := string(strings.Split(stdout, "\n")[0])
+
+	stdout, stderr, _ = RunCommand("git", cwd, "--no-pager", "diff", "--check")
 
 	if len(stderr) != 0 {
 		return errors.New(stderr)
@@ -172,7 +181,7 @@ func Find() (err error) {
 	}
 
 	for fname := range diffMap {
-		absPath := path.Join(cwd, fname)
+		absPath := path.Join(topLevelPath, fname)
 		if err = ReadFile(absPath); err != nil {
 			return
 		}
