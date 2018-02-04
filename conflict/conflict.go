@@ -4,7 +4,7 @@ import (
 	"github.com/mkchoi212/fac/color"
 )
 
-// Conflict represents a single conflict that may have occured
+// Conflict represents a single conflict that may have occurred
 type Conflict struct {
 	Choice       int
 	FileName     string
