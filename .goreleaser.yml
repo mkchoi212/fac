@@ -19,7 +19,6 @@ brew:
   description: "Command line User Interface for fixing git conflicts"
   dependencies:
     - git
-    - go
   install: bin.install "fac"
 
 builds:
