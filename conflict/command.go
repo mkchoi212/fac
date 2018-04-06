@@ -6,7 +6,7 @@ import (
 	"syscall"
 )
 
-// RunCommand runs the given command with arguemtns and returns the output
+// RunCommand runs the given command with arguments and returns the output
 // Refer to https://stackoverflow.com/questions/10385551/get-exit-code-go
 func RunCommand(name string, dir string, args ...string) (stdout string, stderr string, exitCode int) {
 	var outbuf, errbuf bytes.Buffer
