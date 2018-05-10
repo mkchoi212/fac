@@ -153,27 +153,20 @@ Run below command to change to a compatible conflict style
 func Find(cwd string) ([]Conflict, error) {
 	conflicts := []Conflict{}
 
-	stdout, stderr, _ := RunCommand("git", cwd, "rev-parse", "--show-toplevel")
-	if len(stderr) != 0 {
-		return nil, errors.New(stderr)
-	} else if len(stdout) == 0 {
-		return nil, errors.New(stderr)
-	}
-	topLevelPath := string(strings.Split(stdout, "\n")[0])
-
-	stdout, stderr, _ = RunCommand("git", cwd, "--no-pager", "diff", "--check")
-
-	if len(stderr) != 0 {
-		return nil, errors.New(stderr)
-	} else if len(stdout) == 0 {
-		return nil, NewErrNoConflict("No conflicts detected 🎉")
+	topPath, ok := TopLevelPath(cwd)
+	if ok != nil {
+		return nil, ok
 	}
 
-	stdoutLines := strings.Split(stdout, "\n")
+	markerLocations, ok := MarkerLocations(cwd)
+	if ok != nil {
+		return nil, ok
+	}
+
 	diffMap := make(map[string][]int)
 	FileLines = make(map[string][]string)
 
-	for _, line := range stdoutLines {
+	for _, line := range markerLocations {
 		if len(line) == 0 {
 			continue
 		}
@@ -184,7 +177,7 @@ func Find(cwd string) ([]Conflict, error) {
 	}
 
 	for fname := range diffMap {
-		absPath := path.Join(topLevelPath, fname)
+		absPath := path.Join(topPath, fname)
 		if err := ReadFile(absPath); err != nil {
 			return nil, err
 		}

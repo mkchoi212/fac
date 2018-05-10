@@ -1,9 +1,7 @@
 package conflict
 
-import "os"
-
+// Diff is incomplete (TODO)
 func (c *Conflict) Diff() []string {
-	cwd, _ := os.Getwd()
-	stdout, _, _ := RunCommand("git", cwd, "--no-pager", "diff", "--color")
-	return []string{stdout}
+	lines, _ := DiffLines("")
+	return lines
 }

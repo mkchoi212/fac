@@ -174,6 +174,8 @@ func Select(c *conflict.Conflict, g *gocui.Gui, showHelp bool) error {
 		top, bottom := c.PaddingLines()
 		v.Clear()
 		printLines(v, top)
+
+		// TODO: Diff display is not implemented yet
 		if c.DisplayDiff {
 			printLines(v, c.Diff())
 		} else {
