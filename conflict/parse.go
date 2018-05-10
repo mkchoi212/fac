@@ -147,23 +147,26 @@ Run below command to change to a compatible conflict style
 	return parsedConflicts, nil
 }
 
-func Find() (err error) {
-	cwd, _ := os.Getwd()
+// Find runs `git --no-pager diff --check` in order to detect git conflicts
+// If there are no conflicts, it returns a `ErrNoConflict`
+// If there are conflicts, it parses the corresponding files
+func Find(cwd string) ([]Conflict, error) {
+	conflicts := []Conflict{}
 
 	stdout, stderr, _ := RunCommand("git", cwd, "rev-parse", "--show-toplevel")
 	if len(stderr) != 0 {
-		return errors.New(stderr)
+		return nil, errors.New(stderr)
 	} else if len(stdout) == 0 {
-		return errors.New("no git top-level path")
+		return nil, errors.New(stderr)
 	}
 	topLevelPath := string(strings.Split(stdout, "\n")[0])
 
 	stdout, stderr, _ = RunCommand("git", cwd, "--no-pager", "diff", "--check")
 
 	if len(stderr) != 0 {
-		return errors.New(stderr)
+		return nil, errors.New(stderr)
 	} else if len(stdout) == 0 {
-		return NewErrNoConflict("No conflicts detected 🎉")
+		return nil, NewErrNoConflict("No conflicts detected 🎉")
 	}
 
 	stdoutLines := strings.Split(stdout, "\n")
@@ -175,36 +178,35 @@ func Find() (err error) {
 			continue
 		}
 
-		if err = parseRawOutput(line, diffMap); err != nil {
-			return
+		if err := parseRawOutput(line, diffMap); err != nil {
+			return nil, err
 		}
 	}
 
 	for fname := range diffMap {
 		absPath := path.Join(topLevelPath, fname)
-		if err = ReadFile(absPath); err != nil {
-			return
+		if err := ReadFile(absPath); err != nil {
+			return nil, err
 		}
-		if conflicts, err := New(absPath, diffMap[fname]); err == nil {
-			All = append(All, conflicts...)
+		if newConflicts, err := New(absPath, diffMap[fname]); err == nil {
+			conflicts = append(conflicts, newConflicts...)
 		} else {
-			return err
+			return nil, err
 		}
 	}
 
-	Count = len(All)
-	if Count == 0 {
-		return NewErrNoConflict("No conflicts detected 🎉")
+	if len(conflicts) == 0 {
+		return nil, NewErrNoConflict("No conflicts detected 🎉")
 	}
 
-	for i := range All {
-		if err = All[i].ExtractLines(); err != nil {
-			return
+	for i := range conflicts {
+		if err := conflicts[i].ExtractLines(); err != nil {
+			return nil, err
 		}
-		if err = All[i].HighlightSyntax(); err != nil {
-			return
+		if err := conflicts[i].HighlightSyntax(); err != nil {
+			return nil, err
 		}
 	}
 
-	return nil
+	return conflicts, nil
 }

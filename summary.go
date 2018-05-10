@@ -35,7 +35,7 @@ func printSummary() {
 	resolvedCnt := 0
 	var line string
 
-	for _, c := range conflict.All {
+	for _, c := range all {
 		if c.Choice != 0 {
 			line = color.Green(color.Regular, "✔ %s: %d", c.FileName, c.Start)
 			resolvedCnt++
@@ -46,11 +46,11 @@ func printSummary() {
 	}
 
 	var buf bytes.Buffer
-	if resolvedCnt != conflict.Count {
+	if resolvedCnt != numConflicts {
 		buf.WriteString("\nResolved ")
 		buf.WriteString(color.Red(color.Light, "%d ", resolvedCnt))
 		buf.WriteString("conflict(s) out of ")
-		buf.WriteString(color.Red(color.Light, "%d", conflict.Count))
+		buf.WriteString(color.Red(color.Light, "%d", numConflicts))
 	} else {
 		buf.WriteString(color.Green(color.Regular, "\nFixed All Conflicts 🎉"))
 	}
@@ -75,7 +75,7 @@ func writeChanges(absPath string) (err error) {
 }
 
 func FinalizeChanges(absPath string) (err error) {
-	targetConflicts := conflict.In(absPath)
+	targetConflicts := conflict.In(all, absPath)
 
 	var replacementLines []string
 

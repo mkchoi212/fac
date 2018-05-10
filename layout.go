@@ -143,7 +143,7 @@ func Select(c *conflict.Conflict, g *gocui.Gui, showHelp bool) error {
 		}
 		v.Clear()
 
-		for idx, conflict := range conflict.All {
+		for idx, conflict := range all {
 			var out string
 			if conflict.Choice != 0 {
 				out = color.Green(color.Regular, "✔ %s:%d", conflict.FileName, conflict.Start)
@@ -223,22 +223,22 @@ func MoveToItem(dir int, g *gocui.Gui, v *gocui.View) error {
 			cur++
 		}
 
-		if cur >= conflict.Count {
+		if cur >= numConflicts {
 			cur = 0
 		} else if cur < 0 {
-			cur = conflict.Count - 1
+			cur = numConflicts - 1
 		}
 
-		if conflict.All[cur].Choice == 0 || originalCur == cur {
+		if all[cur].Choice == 0 || originalCur == cur {
 			break
 		}
 	}
 
-	if originalCur == cur && conflict.All[cur].Choice != 0 {
+	if originalCur == cur && all[cur].Choice != 0 {
 		globalQuit(g)
 	}
 
-	Select(&conflict.All[cur], g, false)
+	Select(&all[cur], g, false)
 	return nil
 }
 
