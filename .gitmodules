@@ -1,3 +1,4 @@
 [submodule "test"]
 	path = test
 	url = ./test
+  ignore = dirty
