@@ -7,6 +7,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 	"strings"
 
 	"github.com/jroimartin/gocui"
@@ -17,6 +18,8 @@ import (
 var (
 	cur              = 0
 	consecutiveError = 0
+	all              = []conflict.Conflict{}
+	numConflicts     = 0
 )
 
 func printLines(v *gocui.View, lines []string) {
@@ -33,19 +36,19 @@ func parseInput(g *gocui.Gui, v *gocui.View) error {
 	evalCmd := func(in rune, g *gocui.Gui) {
 		switch in {
 		case 'j':
-			Scroll(g, &conflict.All[cur], Up)
+			Scroll(g, &all[cur], Up)
 		case 'k':
-			Scroll(g, &conflict.All[cur], Down)
+			Scroll(g, &all[cur], Down)
 		case 'w':
-			conflict.All[cur].TopPeek++
-			Select(&conflict.All[cur], g, false)
+			all[cur].TopPeek++
+			Select(&all[cur], g, false)
 		case 's':
-			conflict.All[cur].BottomPeek++
-			Select(&conflict.All[cur], g, false)
+			all[cur].BottomPeek++
+			Select(&all[cur], g, false)
 		case 'a':
-			Resolve(&conflict.All[cur], g, v, Local)
+			Resolve(&all[cur], g, v, Local)
 		case 'd':
-			Resolve(&conflict.All[cur], g, v, Incoming)
+			Resolve(&all[cur], g, v, Incoming)
 		case 'n':
 			MoveToItem(Down, g, v)
 		case 'p':
@@ -54,7 +57,7 @@ func parseInput(g *gocui.Gui, v *gocui.View) error {
 			ViewOrientation = ^ViewOrientation
 			layout(g)
 		case 'h', '?':
-			Select(&conflict.All[cur], g, true)
+			Select(&all[cur], g, true)
 		case 'q':
 			globalQuit(g)
 		default:
@@ -62,7 +65,7 @@ func parseInput(g *gocui.Gui, v *gocui.View) error {
 			consecutiveError++
 			if consecutiveError == 2 {
 				consecutiveError = 0
-				Select(&conflict.All[cur], g, true)
+				Select(&all[cur], g, true)
 			}
 			return
 		}
@@ -90,7 +93,9 @@ func parseInput(g *gocui.Gui, v *gocui.View) error {
 }
 
 func main() {
-	if err := conflict.Find(); err != nil {
+	cwd, _ := os.Getwd()
+	conflicts, err := conflict.Find(cwd)
+	if err != nil {
 		switch err.(type) {
 		case *conflict.ErrNoConflict:
 			fmt.Println(color.Green(color.Regular, err.Error()))
@@ -99,6 +104,9 @@ func main() {
 		}
 		return
 	}
+
+	all = conflicts
+	numConflicts = len(conflicts)
 
 	g, err := gocui.NewGui(gocui.OutputNormal)
 	if err != nil {
@@ -114,7 +122,7 @@ func main() {
 		log.Panic(err)
 	}
 
-	Select(&conflict.All[0], g, false)
+	Select(&all[0], g, false)
 
 	if err := g.MainLoop(); err != nil && err != gocui.ErrQuit {
 		log.Panicln(err)

@@ -26,9 +26,8 @@ type Conflict struct {
 	DisplayDiff bool
 }
 
-var All = []Conflict{}
-var Count int
-
+// ErrNoConflict is used to indicate that there
+// are no errors present in the git repo
 type ErrNoConflict struct {
 	message string
 }
@@ -77,10 +76,11 @@ func (c *Conflict) PaddingLines() (topPadding, bottomPadding []string) {
 	return
 }
 
-func In(fname string) (list []Conflict) {
-	for _, c := range All {
+// In finds `Conflict`s that are from the provided file name
+func In(conflicts []Conflict, fname string) (res []Conflict) {
+	for _, c := range conflicts {
 		if c.AbsolutePath == fname && c.Choice != 0 {
-			list = append(list, c)
+			res = append(res, c)
 		}
 	}
 	return
