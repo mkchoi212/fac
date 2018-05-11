@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"os"
 	"strings"
 
 	"github.com/jroimartin/gocui"
@@ -13,9 +12,9 @@ import (
 
 var (
 	cur              = 0
-	consecutiveError = 0
 	all              = []conflict.Conflict{}
 	numConflicts     = 0
+	consecutiveError = 0
 )
 
 func printLines(v *gocui.View, lines []string) {
@@ -89,15 +88,15 @@ func parseInput(g *gocui.Gui, v *gocui.View) error {
 }
 
 func main() {
-	cwd, _ := os.Getwd()
+	//cwd, _ := os.Getwd()
+	cwd := "./test"
 	conflicts, err := conflict.Find(cwd)
 	if err != nil {
-		switch err.(type) {
-		case *conflict.ErrNoConflict:
-			fmt.Println(color.Green(color.Regular, err.Error()))
-		default:
-			fmt.Println(color.Red(color.Regular, err.Error()))
-		}
+		fmt.Println(color.Red(color.Regular, err.Error()))
+		return
+	}
+	if len(conflicts) == 0 {
+		fmt.Println(color.Green(color.Regular, "No conflicts detected 🎉"))
 		return
 	}
 
@@ -115,7 +114,7 @@ func main() {
 		log.Panic(err)
 	}
 	if err := g.SetKeybinding("", gocui.KeyEnter, gocui.ModNone, parseInput); err != nil {
-		log.Panic(err)
+		log.Panicln(err)
 	}
 
 	Select(&all[0], g, false)

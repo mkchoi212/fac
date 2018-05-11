@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"path"
 	"strconv"
@@ -68,41 +67,36 @@ tokenizer:
 	return err
 }
 
-func ReadFile(absPath string) error {
+// ReadFile reads all lines of a given file
+func ReadFile(absPath string) ([]string, error) {
 	input, err := os.Open(absPath)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	defer input.Close()
 
 	r := bufio.NewReader(input)
+	lines := []string{}
 
 	for {
 		data, err := r.ReadBytes('\n')
 		if err == nil || err == io.EOF {
-			FileLines[absPath] = append(FileLines[absPath], string(data))
+			// gocui currently doesn't support printing \r
+			line := strings.Replace(string(data), "\r", "", -1)
+			lines = append(lines, line)
 		}
 
 		if err != nil {
 			if err != io.EOF {
-				return err
+				return nil, err
 			}
 			break
 		}
 	}
-	return nil
+	return lines, nil
 }
 
-func (c *Conflict) ExtractLines() error {
-	lines := FileLines[c.AbsolutePath]
-	c.LocalLines = lines[c.Start : c.Middle-1]
-	c.IncomingLines = lines[c.Middle : c.End-1]
-	c.CurrentName = strings.Split(lines[c.Start-1], " ")[1]
-	c.ForeignName = strings.Split(lines[c.End-1], " ")[1]
-	return nil
-}
-
-func parseRawOutput(diff string, dict map[string][]int) error {
+func parseGitMarkerInfo(diff string, dict map[string][]int) error {
 	parts := strings.Split(diff, ":")
 
 	if len(parts) < 3 || !strings.Contains(diff, "marker") {
@@ -118,29 +112,20 @@ func parseRawOutput(diff string, dict map[string][]int) error {
 	return nil
 }
 
-func New(absPath string, lines []int) ([]Conflict, error) {
-	// Check for diff3 output before parsing
-	for _, line := range FileLines[absPath] {
-		if strings.Contains(line, "||||||| merged common ancestors") {
-			return nil, errors.New(`fac does not support diff3 styled outputs yet 😞
-Run below command to change to a compatible conflict style
-
->> git config --global merge.conflictstyle merge`)
-		}
-	}
+func newConflicts(absPath string, fname string, lines []int) ([]Conflict, error) {
+	parsedConflicts := []Conflict{}
 
 	if len(lines)%3 != 0 {
 		return nil, errors.New("Invalid number of remaining conflict markers")
 	}
 
-	parsedConflicts := []Conflict{}
-	for i := 0; i < len(lines); i += 3 {
-		conf := Conflict{}
+	conf := Conflict{}
+	for i := 0; i < len(lines); i++ {
 		conf.Start = lines[i]
 		conf.Middle = lines[i+1]
 		conf.End = lines[i+2]
 		conf.AbsolutePath = absPath
-		_, conf.FileName = path.Split(absPath)
+		conf.FileName = fname
 		parsedConflicts = append(parsedConflicts, conf)
 	}
 
@@ -151,19 +136,19 @@ Run below command to change to a compatible conflict style
 // If there are no conflicts, it returns a `ErrNoConflict`
 // If there are conflicts, it parses the corresponding files
 func Find(cwd string) ([]Conflict, error) {
-	conflicts := []Conflict{}
+	allConflicts := []Conflict{}
 
 	topPath, ok := TopLevelPath(cwd)
 	if ok != nil {
 		return nil, ok
 	}
 
-	markerLocations, ok := MarkerLocations(cwd)
+	markerLocations, ok := MarkerLocations(topPath)
 	if ok != nil {
 		return nil, ok
 	}
 
-	diffMap := make(map[string][]int)
+	markerLocMap := make(map[string][]int)
 	FileLines = make(map[string][]string)
 
 	for _, line := range markerLocations {
@@ -171,35 +156,36 @@ func Find(cwd string) ([]Conflict, error) {
 			continue
 		}
 
-		if err := parseRawOutput(line, diffMap); err != nil {
+		if err := parseGitMarkerInfo(line, markerLocMap); err != nil {
 			return nil, err
 		}
 	}
 
-	for fname := range diffMap {
+	for fname := range markerLocMap {
 		absPath := path.Join(topPath, fname)
-		if err := ReadFile(absPath); err != nil {
+
+		lines, err := ReadFile(absPath)
+		if err != nil {
 			return nil, err
 		}
-		if newConflicts, err := New(absPath, diffMap[fname]); err == nil {
-			conflicts = append(conflicts, newConflicts...)
+		FileLines[absPath] = append(FileLines[absPath], lines...)
+
+		if conflicts, err := newConflicts(absPath, fname, markerLocMap[fname]); err == nil {
+			allConflicts = append(allConflicts, conflicts...)
 		} else {
 			return nil, err
 		}
 	}
 
-	if len(conflicts) == 0 {
-		return nil, NewErrNoConflict("No conflicts detected 🎉")
-	}
-
-	for i := range conflicts {
-		if err := conflicts[i].ExtractLines(); err != nil {
+	for i := range allConflicts {
+		fileLines := FileLines[allConflicts[i].AbsolutePath]
+		if err := allConflicts[i].Extract(fileLines); err != nil {
 			return nil, err
 		}
-		if err := conflicts[i].HighlightSyntax(); err != nil {
+		if err := allConflicts[i].HighlightSyntax(); err != nil {
 			return nil, err
 		}
 	}
 
-	return conflicts, nil
+	return allConflicts, nil
 }
