@@ -1,16 +1,18 @@
-package conflict
+package conflict_test
 
 import (
 	"strings"
 	"testing"
+
+	"github.com/mkchoi212/fac/conflict"
 )
 
-var TestGitPath = "../test"
-var TestGitSubPath = "../test/assets"
-var CorrectNumMarkers = 75
+var TestGitPath = "assets/dummy_repo"
+var TestGitSubPath = "../assets/dummy_repo/assets"
+var CorrectNumMarkers = 109
 
 func TestMarkerLocations(t *testing.T) {
-	markers, ok := MarkerLocations(TestGitPath)
+	markers, ok := conflict.MarkerLocations("../" + TestGitPath)
 	if ok != nil {
 		t.Errorf("git diff --check failed with error: %s", ok.Error())
 	}
@@ -22,7 +24,7 @@ func TestMarkerLocations(t *testing.T) {
 }
 
 func TestMarkerLocationsFromSubPath(t *testing.T) {
-	markers, ok := MarkerLocations(TestGitSubPath)
+	markers, ok := conflict.MarkerLocations(TestGitSubPath)
 	if ok != nil {
 		t.Errorf("git diff --check from sub-directory failed with error: %s", ok.Error())
 	}
@@ -34,13 +36,13 @@ func TestMarkerLocationsFromSubPath(t *testing.T) {
 }
 
 func TestTopLevelPath(t *testing.T) {
-	topPath, ok := TopLevelPath(TestGitSubPath)
+	topPath, ok := conflict.TopLevelPath(TestGitSubPath)
 
 	if ok != nil {
 		t.Errorf("git rev-parse --show-toplevel failed")
 	}
 
-	if !(strings.Contains(topPath, "fac/test")) {
-		t.Errorf("git rev-parse --show-toplevel was incorrect: got %s, want, %s", topPath, "../fac/test")
+	if !(strings.Contains(topPath, TestGitPath)) {
+		t.Errorf("git rev-parse --show-toplevel was incorrect: got %s, want, %s", topPath, "../"+TestGitPath)
 	}
 }
