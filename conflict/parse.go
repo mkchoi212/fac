@@ -112,23 +112,39 @@ func parseGitMarkerInfo(diff string, dict map[string][]int) error {
 	return nil
 }
 
-func newConflicts(absPath string, fname string, lines []int) ([]Conflict, error) {
+func newConflicts(absPath string, fname string, markerLocations []int) ([]Conflict, error) {
 	parsedConflicts := []Conflict{}
+	lines := FileLines[absPath]
 
-	if len(lines)%3 != 0 {
-		return nil, errors.New("Invalid number of remaining conflict markers")
+	var conf Conflict
+
+	for _, lineNum := range markerLocations {
+		line := lines[lineNum-1]
+
+		switch IdentifyStyle(line) {
+		case start:
+			conf = Conflict{}
+			conf.AbsolutePath = absPath
+			conf.FileName = fname
+			conf.Start = lineNum
+		case separator:
+			conf.Middle = lineNum
+		case diff3:
+			conf.Diff3 = append(conf.Diff3, lineNum)
+		case end:
+			conf.End = lineNum
+			parsedConflicts = append(parsedConflicts, conf)
+		default:
+			continue
+		}
 	}
 
-	conf := Conflict{}
-	for i := 0; i < len(lines); i++ {
-		conf.Start = lines[i]
-		conf.Middle = lines[i+1]
-		conf.End = lines[i+2]
-		conf.AbsolutePath = absPath
-		conf.FileName = fname
-		parsedConflicts = append(parsedConflicts, conf)
+	// Verify all markers are properly parsed/paired
+	for _, c := range parsedConflicts {
+		if !(c.Valid()) {
+			return nil, errors.New("Invalid number of remaining conflict markers")
+		}
 	}
-
 	return parsedConflicts, nil
 }
 
