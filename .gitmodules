@@ -1,4 +1,4 @@
-[submodule "test"]
-	path = test
-	url = ./test
+[submodule "dummy_repo"]
+	path = assets/dummy_repo
+	url = ./assets/dummy_repo
   ignore = dirty
