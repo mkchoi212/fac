@@ -125,8 +125,10 @@ func main() {
 
 	g.Close()
 
-	for fname := range conflict.FileLines {
-		if err := FinalizeChanges(fname); err != nil {
+	for absPath := range conflict.FileLines {
+		targetConflicts := conflict.In(absPath, all)
+		finalLines := FinalizeChanges(targetConflicts, conflict.FileLines[absPath])
+		if err = writeChanges(absPath, finalLines); err != nil {
 			fmt.Println(color.Red(color.Underline, "%s\n", err))
 		}
 	}
