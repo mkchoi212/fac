@@ -116,7 +116,7 @@ func (c *Conflict) PaddingLines() (topPadding, bottomPadding []string) {
 }
 
 // In finds `Conflict`s that are from the provided file name
-func In(conflicts []Conflict, fname string) (res []Conflict) {
+func In(fname string, conflicts []Conflict) (res []Conflict) {
 	for _, c := range conflicts {
 		if c.AbsolutePath == fname && c.Choice != 0 {
 			res = append(res, c)

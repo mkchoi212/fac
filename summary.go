@@ -74,20 +74,16 @@ func writeChanges(absPath string, lines []string) (err error) {
 	return
 }
 
-// FinalizeChanges writes the changes the user selected to file
-func FinalizeChanges(absPath string) (err error) {
-	targetConflicts := conflict.In(all, absPath)
-
+// FinalizeChanges constructs final lines of the file with conflicts removed
+func FinalizeChanges(conflicts []conflict.Conflict, fileLines []string) []string {
 	var replacementLines []string
-	fileLines := conflict.FileLines[absPath]
 
-	for _, c := range targetConflicts {
+	for _, c := range conflicts {
 		if c.Choice == Local {
 			replacementLines = append([]string{}, c.LocalPureLines...)
 		} else {
 			replacementLines = append([]string{}, c.IncomingLines...)
 		}
-
 		i := 0
 		for ; i < len(replacementLines); i++ {
 			fileLines[c.Start+i-1] = replacementLines[i]
@@ -97,8 +93,5 @@ func FinalizeChanges(absPath string) (err error) {
 		}
 	}
 
-	if err = writeChanges(absPath, fileLines); err != nil {
-		return
-	}
-	return
+	return fileLines
 }
