@@ -8,7 +8,7 @@
 </p>
 <br>
 
-I never really liked any of the `mergetools` out there so I made a simple program that does simple things… in a simple fashion.
+I never really liked any of the `mergetools` out there so I made a program that is somewhat easy to use.
 
 ![](./assets/overview.png)
 
@@ -28,8 +28,6 @@ brew install fac
 ```
 
 ## 🔧 Using
-
-> **Please note fac does NOT support diff3 merge conflict outputs yet!**
 
 `fac` operates much like `git add -p` . It has a prompt input at the bottom of the screen where the user inputs various commands.
 

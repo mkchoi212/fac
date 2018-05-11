@@ -15,6 +15,7 @@ import (
 	"github.com/alecthomas/chroma/formatters"
 	"github.com/alecthomas/chroma/lexers"
 	"github.com/alecthomas/chroma/styles"
+	"github.com/mkchoi212/fac/color"
 )
 
 var FileLines map[string][]string
@@ -45,21 +46,27 @@ func (c *Conflict) HighlightSyntax() error {
 	var it chroma.Iterator
 	var err error
 	buf := new(bytes.Buffer)
+	var colorLine string
 
 tokenizer:
 	for i, block := range [][]string{c.LocalLines, c.IncomingLines} {
 		for _, line := range block {
-			if it, err = lexer.Tokenise(nil, line); err != nil {
-				break tokenizer
-			}
-			if err = formatter.Format(buf, style, it); err != nil {
-				break tokenizer
+			if IdentifyStyle(line) == diff3 {
+				colorLine = color.Red(color.Regular, line)
+			} else {
+				if it, err = lexer.Tokenise(nil, line); err != nil {
+					break tokenizer
+				}
+				if err = formatter.Format(buf, style, it); err != nil {
+					break tokenizer
+				}
+				colorLine = buf.String()
 			}
 
 			if i == 0 {
-				c.ColoredLocalLines = append(c.ColoredLocalLines, buf.String())
+				c.ColoredLocalLines = append(c.ColoredLocalLines, colorLine)
 			} else {
-				c.ColoredIncomingLines = append(c.ColoredIncomingLines, buf.String())
+				c.ColoredIncomingLines = append(c.ColoredIncomingLines, colorLine)
 			}
 			buf.Reset()
 		}
