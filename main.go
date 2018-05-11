@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 	"strings"
 
 	"github.com/jroimartin/gocui"
@@ -88,8 +89,7 @@ func parseInput(g *gocui.Gui, v *gocui.View) error {
 }
 
 func main() {
-	//cwd, _ := os.Getwd()
-	cwd := "./assets/dummy_repo"
+	cwd, _ := os.Getwd()
 	conflicts, err := conflict.Find(cwd)
 	if err != nil {
 		fmt.Println(color.Red(color.Regular, err.Error()))
