@@ -1,6 +1,7 @@
 package conflict
 
 import (
+	"sort"
 	"strings"
 
 	"github.com/mkchoi212/fac/color"
@@ -14,8 +15,10 @@ type Conflict struct {
 	Start        int
 	Middle       int
 	End          int
+	Diff3        []int
 
 	LocalLines           []string
+	LocalPureLines       []string
 	IncomingLines        []string
 	ColoredLocalLines    []string
 	ColoredIncomingLines []string
@@ -28,6 +31,39 @@ type Conflict struct {
 	DisplayDiff bool
 }
 
+// Supported git conflict styles
+const (
+	text = iota
+	start
+	diff3
+	separator
+	end
+)
+
+// IdentifyStyle identifies the conflict marker style of provided text
+func IdentifyStyle(line string) (style int) {
+	line = strings.TrimSpace(line)
+
+	if strings.Contains(line, "<<<<<<<") {
+		style = start
+	} else if strings.Contains(line, ">>>>>>>") {
+		style = end
+	} else if line == "||||||| merged common ancestors" {
+		style = diff3
+	} else if line == "=======" {
+		style = separator
+	} else {
+		style = text
+	}
+	return
+}
+
+// Valid checks if the parsed conflict has corresponding begin, separator,
+// and middle line numbers
+func (c *Conflict) Valid() bool {
+	return c.Middle != 0 && c.End != 0
+}
+
 func (c *Conflict) Equal(c2 *Conflict) bool {
 	return c.AbsolutePath == c2.AbsolutePath && c.Start == c2.Start
 }
@@ -37,8 +73,16 @@ func (c *Conflict) ToggleDiff() {
 }
 
 // Extract extracts lines where conflicts exist
+// and corresponding branch names
 func (c *Conflict) Extract(lines []string) error {
 	c.LocalLines = lines[c.Start : c.Middle-1]
+	if len(c.Diff3) != 0 {
+		sort.Ints(c.Diff3)
+		diff3Barrier := c.Diff3[0]
+		c.LocalPureLines = lines[c.Start : diff3Barrier-1]
+	} else {
+		c.LocalPureLines = c.LocalLines
+	}
 	c.IncomingLines = lines[c.Middle : c.End-1]
 	c.CurrentName = strings.Split(lines[c.Start-1], " ")[1]
 	c.ForeignName = strings.Split(lines[c.End-1], " ")[1]

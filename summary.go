@@ -57,7 +57,7 @@ func printSummary() {
 	fmt.Println(buf.String())
 }
 
-func writeChanges(absPath string) (err error) {
+func writeChanges(absPath string, lines []string) (err error) {
 	f, err := os.Create(absPath)
 	if err != nil {
 		return
@@ -65,7 +65,7 @@ func writeChanges(absPath string) (err error) {
 	defer f.Close()
 
 	w := bufio.NewWriter(f)
-	for _, line := range conflict.FileLines[absPath] {
+	for _, line := range lines {
 		if _, err = w.WriteString(line); err != nil {
 			return
 		}
@@ -74,29 +74,30 @@ func writeChanges(absPath string) (err error) {
 	return
 }
 
-// FinalizeChanges writes the changes the user selected
+// FinalizeChanges writes the changes the user selected to file
 func FinalizeChanges(absPath string) (err error) {
 	targetConflicts := conflict.In(all, absPath)
 
 	var replacementLines []string
+	fileLines := conflict.FileLines[absPath]
 
 	for _, c := range targetConflicts {
 		if c.Choice == Local {
-			replacementLines = append([]string{}, c.LocalLines...)
+			replacementLines = append([]string{}, c.LocalPureLines...)
 		} else {
 			replacementLines = append([]string{}, c.IncomingLines...)
 		}
 
 		i := 0
 		for ; i < len(replacementLines); i++ {
-			conflict.FileLines[absPath][c.Start+i-1] = replacementLines[i]
+			fileLines[c.Start+i-1] = replacementLines[i]
 		}
 		for ; c.End-c.Start >= i; i++ {
-			conflict.FileLines[absPath][c.Start+i-1] = ""
+			fileLines[c.Start+i-1] = ""
 		}
 	}
 
-	if err = writeChanges(absPath); err != nil {
+	if err = writeChanges(absPath, fileLines); err != nil {
 		return
 	}
 	return

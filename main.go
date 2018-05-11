@@ -89,7 +89,7 @@ func parseInput(g *gocui.Gui, v *gocui.View) error {
 
 func main() {
 	//cwd, _ := os.Getwd()
-	cwd := "./test"
+	cwd := "./assets/dummy_repo"
 	conflicts, err := conflict.Find(cwd)
 	if err != nil {
 		fmt.Println(color.Red(color.Regular, err.Error()))
