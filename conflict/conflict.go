@@ -1,6 +1,8 @@
 package conflict
 
 import (
+	"strings"
+
 	"github.com/mkchoi212/fac/color"
 )
 
@@ -26,28 +28,21 @@ type Conflict struct {
 	DisplayDiff bool
 }
 
-// ErrNoConflict is used to indicate that there
-// are no errors present in the git repo
-type ErrNoConflict struct {
-	message string
-}
-
-func NewErrNoConflict(message string) *ErrNoConflict {
-	return &ErrNoConflict{
-		message: message,
-	}
-}
-
-func (e *ErrNoConflict) Error() string {
-	return e.message
-}
-
 func (c *Conflict) Equal(c2 *Conflict) bool {
 	return c.AbsolutePath == c2.AbsolutePath && c.Start == c2.Start
 }
 
 func (c *Conflict) ToggleDiff() {
 	c.DisplayDiff = !(c.DisplayDiff)
+}
+
+// Extract extracts lines where conflicts exist
+func (c *Conflict) Extract(lines []string) error {
+	c.LocalLines = lines[c.Start : c.Middle-1]
+	c.IncomingLines = lines[c.Middle : c.End-1]
+	c.CurrentName = strings.Split(lines[c.Start-1], " ")[1]
+	c.ForeignName = strings.Split(lines[c.End-1], " ")[1]
+	return nil
 }
 
 func (c *Conflict) PaddingLines() (topPadding, bottomPadding []string) {

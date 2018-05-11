@@ -74,6 +74,7 @@ func writeChanges(absPath string) (err error) {
 	return
 }
 
+// FinalizeChanges writes the changes the user selected
 func FinalizeChanges(absPath string) (err error) {
 	targetConflicts := conflict.In(all, absPath)
 

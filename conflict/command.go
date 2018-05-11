@@ -49,10 +49,7 @@ func MarkerLocations(cwd string) ([]string, error) {
 
 	if len(stderr) != 0 {
 		return nil, errors.New(stderr)
-	} else if len(stdout) == 0 {
-		return nil, NewErrNoConflict("No conflicts detected 🎉")
 	}
-
 	return strings.Split(stdout, "\n"), nil
 }
 

@@ -58,7 +58,6 @@ func makePanels(g *gocui.Gui) error {
 		y0, y1 = 0, viewHeight
 		x2, x3 = branchViewWidth, branchViewWidth*2
 		y2, y3 = 0, viewHeight
-
 	} else {
 		branchViewWidth = branchViewWidth * 2
 		viewHeight = (maxY - inputHeight) / 2
@@ -108,7 +107,7 @@ func makePrompt(g *gocui.Gui) error {
 	inputHeight := 2
 	viewHeight := maxY - inputHeight
 
-	// Instruction View
+	// Input instruction view
 	if v, err := g.SetView(Prompt, 0, viewHeight, 19, viewHeight+inputHeight); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
@@ -119,7 +118,7 @@ func makePrompt(g *gocui.Gui) error {
 		v.MoveCursor(11, 0, true)
 	}
 
-	// Input View
+	// Input view
 	if v, err := g.SetView(Input, 15, viewHeight, maxX, viewHeight+inputHeight); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
@@ -136,6 +135,7 @@ func makePrompt(g *gocui.Gui) error {
 }
 
 func Select(c *conflict.Conflict, g *gocui.Gui, showHelp bool) error {
+	// Update side panel
 	g.Update(func(g *gocui.Gui) error {
 		v, err := g.View(Panel)
 		if err != nil {
@@ -164,6 +164,7 @@ func Select(c *conflict.Conflict, g *gocui.Gui, showHelp bool) error {
 		return nil
 	})
 
+	// Update code view
 	g.Update(func(g *gocui.Gui) error {
 		v, err := g.View(Current)
 		if err != nil {
@@ -174,13 +175,7 @@ func Select(c *conflict.Conflict, g *gocui.Gui, showHelp bool) error {
 		top, bottom := c.PaddingLines()
 		v.Clear()
 		printLines(v, top)
-
-		// TODO: Diff display is not implemented yet
-		if c.DisplayDiff {
-			printLines(v, c.Diff())
-		} else {
-			printLines(v, c.ColoredLocalLines)
-		}
+		printLines(v, c.ColoredLocalLines)
 		printLines(v, bottom)
 		if c.Choice == Local {
 			v.FgColor = gocui.ColorGreen
