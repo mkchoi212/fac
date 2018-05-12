@@ -1,4 +1,0 @@
-[submodule "dummy_repo"]
-	path = assets/dummy_repo
-	url = ./assets/dummy_repo
-  ignore = dirty
