@@ -13,7 +13,7 @@
 
 I never really liked any of the `mergetools` out there so I made a program that is somewhat easy to use.
 
-![](./assets/overview.png)
+![](./assets/screenshot.png)
 
 ## 👷 Installation
 
