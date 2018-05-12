@@ -12,5 +12,3 @@ dist
 .vscode
 debug
 
-# Sample git conflict directory
-assets/dummy_repo
