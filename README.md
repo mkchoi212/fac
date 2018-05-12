@@ -1,11 +1,14 @@
 <p align="center">
      <img src="./assets/header.png">
-<p align="center">
-    Easy-to-use CUI for fixing git conflicts
-    <br>
-    <br>
-  </p>
+     <p align="center">
+          <img src="https://travis-ci.org/mkchoi212/fac.svg?branch=master">
+          <img src="https://goreportcard.com/badge/github.com/mkchoi212/fac">
+          <br>
+          <br>
+          Easy-to-use CUI for fixing git conflicts
+     </p>
 </p>
+
 <br>
 
 I never really liked any of the `mergetools` out there so I made a program that is somewhat easy to use.
