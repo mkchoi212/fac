@@ -1,5 +1,5 @@
 <p align="center">
-     <img src="./assets/header.png">
+     <img src="./assets/banner.png">
      <p align="center">
           <img src="https://travis-ci.org/mkchoi212/fac.svg?branch=master">
           <img src="https://goreportcard.com/badge/github.com/mkchoi212/fac">
