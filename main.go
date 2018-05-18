@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"os"
 	"strings"
 
 	"github.com/jroimartin/gocui"
@@ -12,9 +11,8 @@ import (
 )
 
 var (
+	conflicts        = []*conflict.Conflict{}
 	cur              = 0
-	all              = []conflict.Conflict{}
-	numConflicts     = 0
 	consecutiveError = 0
 )
 
@@ -32,19 +30,19 @@ func parseInput(g *gocui.Gui, v *gocui.View) error {
 	evalCmd := func(in rune, g *gocui.Gui) {
 		switch in {
 		case 'j':
-			Scroll(g, &all[cur], Up)
+			Scroll(g, conflicts[cur], Up)
 		case 'k':
-			Scroll(g, &all[cur], Down)
+			Scroll(g, conflicts[cur], Down)
 		case 'w':
-			all[cur].TopPeek++
-			Select(&all[cur], g, false)
+			conflicts[cur].TopPeek++
+			Select(conflicts[cur], g, false)
 		case 's':
-			all[cur].BottomPeek++
-			Select(&all[cur], g, false)
+			conflicts[cur].BottomPeek++
+			Select(conflicts[cur], g, false)
 		case 'a':
-			Resolve(&all[cur], g, v, Local)
+			Resolve(conflicts[cur], g, v, conflict.Local)
 		case 'd':
-			Resolve(&all[cur], g, v, Incoming)
+			Resolve(conflicts[cur], g, v, conflict.Incoming)
 		case 'n':
 			MoveToItem(Down, g, v)
 		case 'p':
@@ -53,7 +51,7 @@ func parseInput(g *gocui.Gui, v *gocui.View) error {
 			ViewOrientation = ^ViewOrientation
 			layout(g)
 		case 'h', '?':
-			Select(&all[cur], g, true)
+			Select(conflicts[cur], g, true)
 		case 'q':
 			globalQuit(g)
 		default:
@@ -61,7 +59,7 @@ func parseInput(g *gocui.Gui, v *gocui.View) error {
 			consecutiveError++
 			if consecutiveError == 2 {
 				consecutiveError = 0
-				Select(&all[cur], g, true)
+				Select(conflicts[cur], g, true)
 			}
 			return
 		}
@@ -89,20 +87,27 @@ func parseInput(g *gocui.Gui, v *gocui.View) error {
 }
 
 func main() {
-	cwd, _ := os.Getwd()
-	conflicts, err := conflict.Find(cwd)
+	// Find and parse conflicts
+	//cwd, _ := os.Getwd()
+	cwd := "../dummy_repo"
+	files, err := conflict.Find(cwd)
 	if err != nil {
 		fmt.Println(color.Red(color.Regular, err.Error()))
 		return
 	}
-	if len(conflicts) == 0 {
+	if len(files) == 0 {
 		fmt.Println(color.Green(color.Regular, "No conflicts detected 🎉"))
 		return
 	}
 
-	all = conflicts
-	numConflicts = len(conflicts)
+	for i := range files {
+		file := files[i]
+		for j := range file.Conflicts {
+			conflicts = append(conflicts, &file.Conflicts[j])
+		}
+	}
 
+	// Setup CUI Environment
 	g, err := gocui.NewGui(gocui.OutputNormal)
 	if err != nil {
 		log.Panicln(err)
@@ -117,18 +122,15 @@ func main() {
 		log.Panicln(err)
 	}
 
-	Select(&all[0], g, false)
-
+	// Main UI loop
+	Select(conflicts[0], g, false)
 	if err := g.MainLoop(); err != nil && err != gocui.ErrQuit {
 		log.Panicln(err)
 	}
-
 	g.Close()
 
-	for absPath := range conflict.FileLines {
-		targetConflicts := conflict.In(absPath, all)
-		finalLines := FinalizeChanges(targetConflicts, conflict.FileLines[absPath])
-		if err = writeChanges(absPath, finalLines); err != nil {
+	for _, file := range files {
+		if err = file.WriteChanges(); err != nil {
 			fmt.Println(color.Red(color.Underline, "%s\n", err))
 		}
 	}

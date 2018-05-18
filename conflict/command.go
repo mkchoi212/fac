@@ -65,9 +65,3 @@ func TopLevelPath(cwd string) (string, error) {
 
 	return string(strings.Split(stdout, "\n")[0]), nil
 }
-
-// DiffLines is incomplete (TODO)
-func DiffLines(cwd string) ([]string, error) {
-	stdout, _, _ := run("git", cwd, "--no-pager", "diff", "--color")
-	return []string{stdout}, nil
-}
