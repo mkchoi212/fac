@@ -1,14 +1,49 @@
+### Go ###
 # Binaries for programs and plugins
-dist
 *.exe
+*.exe~
 *.dll
 *.so
 *.dylib
 
 # Test binary, build with `go test -c`
 *.test
-
-# Stuff from VSCode
-.vscode
 debug
+
+# goreleaser
+dist
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+### Code ###
+# Visual Studio Code - https://code.visualstudio.com/
+.settings/
+.vscode/
+tsconfig.json
+jsconfig.json
+
+### macOS ###
+*.DS_Store
+.AppleDouble
+.LSOverride
+
+# Thumbnails
+._*
+
+# Files that might appear in the root of a volume
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
 
