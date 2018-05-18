@@ -1,14 +1,21 @@
 <p align="center">
-     <img src="./assets/banner.png">
-     <p align="center">
-          <img src="https://travis-ci.org/mkchoi212/fac.svg?branch=master">
-          <img src="https://goreportcard.com/badge/github.com/mkchoi212/fac">
-          <br>
-          <br>
-          Easy-to-use CUI for fixing git conflicts
-     </p>
+  <img src="./assets/banner.png">
+  <br>
+  Easy-to-use CUI for fixing git conflicts
+  <br>
+  <br>
+  <p align="center">
+    <a href="https://travis-ci.org/mkchoi212/fac">
+      <img src="https://travis-ci.org/mkchoi212/fac.svg?branch=master">
+    </a>
+    <a href="https://goreportcard.com/report/github.com/mkchoi212/fac">
+      <img src="https://goreportcard.com/badge/github.com/mkchoi212/fac">
+    </a>
+    <a href="https://codecov.io/gh/mkchoi212/fac">
+      <img src="https://codecov.io/gh/mkchoi212/fac/branch/master/graph/badge.svg">
+    </a>
+  </p>
 </p>
-
 <br>
 
 I never really liked any of the `mergetools` out there so I made a program that is somewhat easy to use.
