@@ -2,4 +2,4 @@ language: go
 go:
   - master
 
-script: go test -v `go list ./... | grep -v assets`
+script: go test -v -cover `go list ./...`
