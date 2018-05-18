@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"fmt"
 
+	"github.com/mkchoi212/fac/conflict"
+
 	"github.com/jroimartin/gocui"
 	"github.com/mkchoi212/fac/color"
 )
@@ -28,7 +30,7 @@ func printHelp(v *gocui.View) {
 	fmt.Fprintf(v, color.Blue(color.Regular, instruction))
 }
 
-func printSummary() {
+func printSummary(conflicts []*conflict.Conflict) {
 	resolvedCnt := 0
 	var line string
 

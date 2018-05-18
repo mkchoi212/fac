@@ -134,5 +134,5 @@ func main() {
 			fmt.Println(color.Red(color.Underline, "%s\n", err))
 		}
 	}
-	printSummary()
+	printSummary(conflicts)
 }
