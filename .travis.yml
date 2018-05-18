@@ -1,5 +1,15 @@
 language: go
+
 go:
   - master
+  - tip
 
-script: go test -v -cover `go list ./...`
+before_install:
+    - go get -t -v ./...
+
+script: 
+    - go test -race -coverprofile=coverage.txt -covermode=atomic `go list ./...`
+
+after_success:
+    - bash <(curl -s https://codecov.io/bash)
+
