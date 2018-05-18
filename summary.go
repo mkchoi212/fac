@@ -3,32 +3,35 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"io"
 
-	"github.com/jroimartin/gocui"
+	"github.com/mkchoi212/fac/conflict"
+
 	"github.com/mkchoi212/fac/color"
 )
 
-func printHelp(v *gocui.View) {
-	instruction := `
-	w - show more lines up
-	s - show more lines down
-	a - use local version
-	d - use incoming version
+var instruction = `
+w - show more lines up
+s - show more lines down
+a - use local version
+d - use incoming version
 
-	j - scroll down
-	k - scroll up
+j - scroll down
+k - scroll up
 
-	v - [v]iew orientation
-	n - [n]ext conflict
-	p - [p]revious conflict
+v - [v]iew orientation
+n - [n]ext conflict
+p - [p]revious conflict
 
-	h | ? - [h]elp
-	q | Ctrl+c - [q]uit
-	`
+h | ? - [h]elp
+q | Ctrl+c - [q]uit
+`
+
+func printHelp(v io.Writer) {
 	fmt.Fprintf(v, color.Blue(color.Regular, instruction))
 }
 
-func printSummary() {
+func printSummary(conflicts []*conflict.Conflict) {
 	resolvedCnt := 0
 	var line string
 
