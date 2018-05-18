@@ -15,10 +15,8 @@ const (
 	Prompt  = "prompt"
 	Input   = "input prompt"
 
-	Local    = 1
-	Incoming = 2
-	Up       = 3
-	Down     = 4
+	Up   = 3
+	Down = 4
 
 	Horizontal = 5
 	Vertical   = -6
@@ -143,12 +141,12 @@ func Select(c *conflict.Conflict, g *gocui.Gui, showHelp bool) error {
 		}
 		v.Clear()
 
-		for idx, conflict := range all {
+		for idx, conflict := range conflicts {
 			var out string
 			if conflict.Choice != 0 {
-				out = color.Green(color.Regular, "✔ %s:%d", conflict.FileName, conflict.Start)
+				out = color.Green(color.Regular, "✔ %s:%d", conflict.File.Name, conflict.Start)
 			} else {
-				out = color.Red(color.Regular, "%d. %s:%d", idx+1, conflict.FileName, conflict.Start)
+				out = color.Red(color.Regular, "%d. %s:%d", idx+1, conflict.File.Name, conflict.Start)
 			}
 
 			if conflict.Equal(c) {
@@ -177,7 +175,7 @@ func Select(c *conflict.Conflict, g *gocui.Gui, showHelp bool) error {
 		printLines(v, top)
 		printLines(v, c.ColoredLocalLines)
 		printLines(v, bottom)
-		if c.Choice == Local {
+		if c.Choice == conflict.Local {
 			v.FgColor = gocui.ColorGreen
 		}
 
@@ -192,7 +190,7 @@ func Select(c *conflict.Conflict, g *gocui.Gui, showHelp bool) error {
 		printLines(v, top)
 		printLines(v, c.ColoredIncomingLines)
 		printLines(v, bottom)
-		if c.Choice == Incoming {
+		if c.Choice == conflict.Incoming {
 			v.FgColor = gocui.ColorGreen
 		}
 
@@ -220,22 +218,22 @@ func MoveToItem(dir int, g *gocui.Gui, v *gocui.View) error {
 			cur++
 		}
 
-		if cur >= numConflicts {
+		if cur >= len(conflicts) {
 			cur = 0
 		} else if cur < 0 {
-			cur = numConflicts - 1
+			cur = len(conflicts) - 1
 		}
 
-		if all[cur].Choice == 0 || originalCur == cur {
+		if conflicts[cur].Choice == 0 || originalCur == cur {
 			break
 		}
 	}
 
-	if originalCur == cur && all[cur].Choice != 0 {
+	if originalCur == cur && conflicts[cur].Choice != 0 {
 		globalQuit(g)
 	}
 
-	Select(&all[cur], g, false)
+	Select(conflicts[cur], g, false)
 	return nil
 }
 
