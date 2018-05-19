@@ -8,12 +8,16 @@ import (
 	"syscall"
 )
 
-// RunCommand runs the given command with arguments and returns the output
+var execCommand = exec.Command
+var cwdEnvFlag = "GO_MOCK_PROCESS_DIRECTORY="
+
+// run runs the given command with arguments and returns the output
 // Refer to https://stackoverflow.com/questions/10385551/get-exit-code-go
 func run(name string, dir string, args ...string) (stdout string, stderr string, exitCode int) {
 	var outbuf, errbuf bytes.Buffer
-	cmd := exec.Command(name, args...)
+	cmd := execCommand(name, args...)
 	cmd.Dir = dir
+	cmd.Env = append(cmd.Env, cwdEnvFlag+dir)
 	cmd.Stdout = &outbuf
 	cmd.Stderr = &errbuf
 
@@ -58,8 +62,6 @@ func TopLevelPath(cwd string) (string, error) {
 	stdout, stderr, _ := run("git", cwd, "rev-parse", "--show-toplevel")
 
 	if len(stderr) != 0 {
-		return "", errors.New(stderr)
-	} else if len(stdout) == 0 {
 		return "", errors.New(stderr)
 	}
 
