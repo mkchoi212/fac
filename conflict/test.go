@@ -4,6 +4,7 @@ type test struct {
 	path          string
 	diffCheck     []string
 	markers       []int
+	numConflicts  int
 	highlightable bool
 	parsable      bool
 }
@@ -13,6 +14,7 @@ var tests = []test{
 		path:          "testdata/assets/README.md",
 		diffCheck:     readmeDiffCheck,
 		markers:       []int{20, 22, 24, 26, 32, 35, 38, 41},
+		numConflicts:  2,
 		highlightable: true,
 		parsable:      true,
 	},
@@ -20,6 +22,7 @@ var tests = []test{
 		path:          "testdata/CircularCrownSelector.swift",
 		diffCheck:     ccDiffCheck,
 		markers:       []int{14, 22, 30, 38},
+		numConflicts:  1,
 		highlightable: true,
 		parsable:      true,
 	},
@@ -27,6 +30,7 @@ var tests = []test{
 		path:          "testdata/lorem_ipsum",
 		diffCheck:     loremDiffCheck,
 		markers:       []int{3, 6, 9},
+		numConflicts:  1,
 		highlightable: false,
 		parsable:      true,
 	},
@@ -34,6 +38,7 @@ var tests = []test{
 		path:          "testdata/lorem_ipsum",
 		diffCheck:     loremDiffCheck,
 		markers:       []int{3, 9},
+		numConflicts:  0,
 		highlightable: false,
 		parsable:      false,
 	},

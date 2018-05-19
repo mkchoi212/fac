@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strconv"
+	"strings"
 	"testing"
 )
 
@@ -12,12 +14,11 @@ var mockInvalidDirectory = "/hello/world"
 
 var commands = []struct {
 	command string
-	path    string
 	ok      bool
 }{
-	{"time", mockValidDirectory, true},
-	{"ls", mockValidDirectory, true},
-	{"less", mockInvalidDirectory, false},
+	{"time", true},
+	{"ls", true},
+	{"foobar", false},
 }
 
 func TestHelperProcess(t *testing.T) {
@@ -25,15 +26,31 @@ func TestHelperProcess(t *testing.T) {
 		return
 	}
 
-	cwd := os.Getenv(cwdEnvFlag)
+	args := os.Getenv(argsEnvFlag)
 
-	if cwd == mockInvalidDirectory {
+	// Purposely fail test
+	if args == "false" {
 		fmt.Fprintf(os.Stderr, "Mock exec: Command tragically failed")
 		os.Exit(1)
-	} else {
-		fmt.Fprintf(os.Stdout, "Mock exec: Command succeeded")
+	}
+
+	// TopLevelPath arguements
+	if args == "rev-parse,--show-toplevel" {
+		fmt.Fprintf(os.Stdout, "testdata")
 		os.Exit(0)
 	}
+
+	// MarkerLocation arguements
+	if args == "--no-pager,diff,--check" {
+		allCheckOutput := append([]string{}, loremDiffCheck...)
+		allCheckOutput = append(allCheckOutput, ccDiffCheck...)
+		allCheckOutput = append(allCheckOutput, readmeDiffCheck...)
+		fmt.Fprintf(os.Stdout, strings.Join(allCheckOutput, "\n"))
+		os.Exit(0)
+	}
+
+	fmt.Fprintf(os.Stdout, "Mock exec: Command succeeded")
+	os.Exit(0)
 }
 
 // Allows us to mock exec.Command, thanks to
@@ -42,7 +59,7 @@ func mockExecCommand(command string, args ...string) *exec.Cmd {
 	cs := []string{"-test.run=TestHelperProcess", "--", command}
 	cs = append(cs, args...)
 	cmd := exec.Command(os.Args[0], cs...)
-	cmd.Env = []string{"GO_WANT_HELPER_PROCESS=1"}
+	cmd.Env = append(cmd.Env, "GO_WANT_HELPER_PROCESS=1")
 	return cmd
 }
 
@@ -51,7 +68,7 @@ func TestRun(t *testing.T) {
 	defer func() { execCommand = exec.Command }()
 
 	for _, test := range commands {
-		stdout, stderr, exitCode := run(test.command, test.path)
+		stdout, stderr, exitCode := run(test.command, ".", strconv.FormatBool(test.ok))
 
 		if test.ok && exitCode != 0 {
 			t.Errorf("run failed: got %s with exit code %d, expected no errors", stderr, exitCode)

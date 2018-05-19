@@ -1,6 +1,7 @@
 package conflict
 
 import (
+	"os/exec"
 	"reflect"
 	"testing"
 )
@@ -32,6 +33,31 @@ func TestParseConflictsIn(t *testing.T) {
 		_, err := parseConflictsIn(f, test.markers)
 		if err != nil && test.parsable {
 			t.Errorf("parseConflicts failed: %s", err.Error())
+		}
+	}
+}
+
+func TestFind(t *testing.T) {
+	execCommand = mockExecCommand
+	defer func() { execCommand = exec.Command }()
+
+	files, err := Find(".")
+	if err != nil {
+		t.Errorf("Find failed: %s", err.Error())
+	}
+
+	if len(files) != 3 {
+		t.Errorf("Find failed: got %d files, want 3", len(files))
+	}
+
+	for _, f := range files {
+		for _, test := range tests {
+			if f.AbsolutePath == test.path && test.parsable {
+				if len(f.Conflicts) != test.numConflicts {
+					t.Errorf("Find failed: got %d conflicts in %s, want %d",
+						len(f.Conflicts), test.path, test.numConflicts)
+				}
+			}
 		}
 	}
 }

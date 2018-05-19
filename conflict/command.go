@@ -9,7 +9,7 @@ import (
 )
 
 var execCommand = exec.Command
-var cwdEnvFlag = "GO_MOCK_PROCESS_DIRECTORY="
+var argsEnvFlag = "GO_MOCK_PROCESS_ARGS"
 
 // run runs the given command with arguments and returns the output
 // Refer to https://stackoverflow.com/questions/10385551/get-exit-code-go
@@ -17,7 +17,10 @@ func run(name string, dir string, args ...string) (stdout string, stderr string,
 	var outbuf, errbuf bytes.Buffer
 	cmd := execCommand(name, args...)
 	cmd.Dir = dir
-	cmd.Env = append(cmd.Env, cwdEnvFlag+dir)
+
+	// Save config for testing purposes
+	cmd.Env = append(cmd.Env, argsEnvFlag+"="+strings.Join(args, ","))
+
 	cmd.Stdout = &outbuf
 	cmd.Stderr = &errbuf
 
