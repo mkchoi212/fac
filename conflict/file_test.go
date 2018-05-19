@@ -2,59 +2,59 @@ package conflict
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 )
 
-var conflictFile = struct {
-	readPath  string
-	writePath string
-	markers   []int
-	lineNum   int
-}{
-	readPath:  "testdata/CircularCrownSelector.swift",
-	writePath: "testdata/output.swift",
-	markers:   []int{14, 22, 30, 38},
-	lineNum:   39,
-}
-
 func TestRead(t *testing.T) {
-	f := File{AbsolutePath: conflictFile.readPath}
-	if err := f.Read(); err != nil {
-		t.Error("Read failed: could not read file")
-	}
+	for _, test := range tests {
+		f := File{AbsolutePath: test.path}
+		if err := f.Read(); err != nil {
+			t.Error("Read failed: could not read file")
+		}
 
-	if len(f.Lines) != conflictFile.lineNum {
-		t.Errorf("Read failed: got %d lines, wanted %d lines", len(f.Lines), conflictFile.lineNum)
+		if len(f.Lines) != test.numLines {
+			t.Errorf("Read failed: got %d lines, wanted %d lines", len(f.Lines), test.numLines)
+		}
 	}
 }
 
 func TestWriteChanges(t *testing.T) {
-	f := File{AbsolutePath: conflictFile.readPath}
-	if err := f.Read(); err != nil {
-		t.Error("WriteChanges/Read failed")
-	}
+	for _, test := range tests {
+		f := File{AbsolutePath: test.path}
+		if err := f.Read(); err != nil {
+			t.Fatalf("WriteChanges/Read failed")
+		}
 
-	conflicts, err := parseConflictsIn(f, conflictFile.markers)
-	if err != nil {
-		t.Error("WriteChanges/parseConflicts failed")
-	}
+		conflicts, err := parseConflictsIn(f, test.markers)
+		if err != nil {
+			if !test.shouldPass {
+				continue
+			}
+			t.Fatal("WriteChanges/parseConflicts failed")
+		}
 
-	f.Conflicts = conflicts
-	targetConflict := &f.Conflicts[0]
-	targetConflict.Choice = Local
+		for i := range test.resolveDecision {
+			conflicts[i].Choice = test.resolveDecision[i]
+		}
+		f.Conflicts = conflicts
 
-	f.AbsolutePath = conflictFile.writePath
-	if err := f.WriteChanges(); err != nil {
-		t.Errorf("WriteChages failed: %s", err.Error())
-	}
+		f.AbsolutePath = "testdata/.test_output"
+		if err := f.WriteChanges(); err != nil {
+			t.Errorf("WriteChages failed: %s", err.Error())
+		}
 
-	expected := f.Lines[11:22]
-	f.Lines = nil
-	if err := f.Read(); err != nil {
-		t.Error("WriteChanges/Read failed")
-	}
+		f.Lines = nil
+		if err := f.Read(); err != nil {
+			t.Error("WriteChanges/Read failed")
+		}
 
-	output := f.Lines[11:]
-	if reflect.DeepEqual(output, expected) {
+		for i := range f.Lines {
+			f.Lines[i] = strings.TrimSuffix(f.Lines[i], "\n")
+		}
+
+		if !(reflect.DeepEqual(f.Lines, test.resolved)) {
+			t.Errorf("WriteChanges failed: got %v, want %v", f.Lines, test.resolved)
+		}
 	}
 }

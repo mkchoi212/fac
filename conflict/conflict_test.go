@@ -148,7 +148,7 @@ func TestHighlight(t *testing.T) {
 
 		conflicts, err := parseConflictsIn(f, test.markers)
 		if err != nil {
-			if !test.parsable {
+			if !test.shouldPass {
 				continue
 			}
 			t.Error("conflict/parseConflicts failed")

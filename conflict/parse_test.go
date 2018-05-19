@@ -17,7 +17,7 @@ func TestParseGitInfo(t *testing.T) {
 			output = append(output, lineNum)
 		}
 
-		if !(reflect.DeepEqual(output, test.markers)) && test.parsable {
+		if !(reflect.DeepEqual(output, test.markers)) && test.shouldPass {
 			t.Errorf("parseGitInfo failed: got %v, want %v", output, test.markers)
 		}
 	}
@@ -31,7 +31,7 @@ func TestParseConflictsIn(t *testing.T) {
 		}
 
 		_, err := parseConflictsIn(f, test.markers)
-		if err != nil && test.parsable {
+		if err != nil && test.shouldPass {
 			t.Errorf("parseConflicts failed: %s", err.Error())
 		}
 	}
@@ -52,7 +52,7 @@ func TestFind(t *testing.T) {
 
 	for _, f := range files {
 		for _, test := range tests {
-			if f.AbsolutePath == test.path && test.parsable {
+			if f.AbsolutePath == test.path && test.shouldPass {
 				if len(f.Conflicts) != test.numConflicts {
 					t.Errorf("Find failed: got %d conflicts in %s, want %d",
 						len(f.Conflicts), test.path, test.numConflicts)

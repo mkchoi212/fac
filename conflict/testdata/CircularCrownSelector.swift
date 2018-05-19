@@ -3,11 +3,11 @@ private func generateInitials() -> [String] {
   let str = randomString.replacingOccurrences(of: "-", with: "")
 
   let abbrev = stride(from: 0, to: 18, by: 2).map { i -> String in
-      let start = str.index(str.startIndex, offsetBy: i)
-      let end = str.index(str.startIndex, offsetBy: i + 2)
-      return String(str[start..<end])
+    let start = str.index(str.startIndex, offsetBy: i)
+    let end = str.index(str.startIndex, offsetBy: i + 2)
+    return String(str[start..<end])
   }
-  
+
   return abbrev
 }
 
@@ -34,5 +34,5 @@ private func randomColor() -> UIColor{
   let green = CGFloat(arc4random()) 
   let blue = CGFloat(arc4random())  
   return UIColor(red:red, green: green, blue: blue, alpha: 1.0)
-} 
+}
 >>>>>>> Stashed changes

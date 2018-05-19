@@ -17,7 +17,7 @@ dist
 *.out
 
 # Dummy conflict code
-conflict/testdata/output.swift
+conflict/testdata/.test_output
 
 ### Code ###
 # Visual Studio Code - https://code.visualstudio.com/
