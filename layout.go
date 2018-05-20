@@ -105,18 +105,16 @@ func makePrompt(g *gocui.Gui) error {
 	inputHeight := 2
 	viewHeight := maxY - inputHeight
 
-	// Input instruction view
+	// Prompt view
 	if v, err := g.SetView(Prompt, 0, viewHeight, 19, viewHeight+inputHeight); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
 		v.Frame = false
-		prompt := color.Green(color.Regular, promptString)
-		v.Write([]byte(prompt))
-		v.MoveCursor(11, 0, true)
+		PrintPrompt(g, color.Green)
 	}
 
-	// Input view
+	// User input view
 	if v, err := g.SetView(Input, 15, viewHeight, maxX, viewHeight+inputHeight); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
@@ -124,7 +122,6 @@ func makePrompt(g *gocui.Gui) error {
 		v.Frame = false
 		v.Editable = true
 		v.Wrap = false
-		v.Editor = gocui.EditorFunc(promptEditor)
 		if _, err := g.SetCurrentView(Input); err != nil {
 			return err
 		}

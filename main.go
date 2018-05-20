@@ -56,7 +56,8 @@ func parseInput(g *gocui.Gui, v *gocui.View) error {
 		case 'q':
 			globalQuit(g)
 		default:
-			PrintPrompt(g, color.Red(color.Regular, promptString))
+			PrintPrompt(g, color.Red)
+
 			consecutiveError++
 			if consecutiveError == 2 {
 				consecutiveError = 0
@@ -65,7 +66,7 @@ func parseInput(g *gocui.Gui, v *gocui.View) error {
 			return
 		}
 		consecutiveError = 0
-		PrintPrompt(g, color.Green(color.Regular, promptString))
+		PrintPrompt(g, color.Green)
 	}
 
 	in := strings.TrimSuffix(v.Buffer(), "\n")
@@ -75,7 +76,7 @@ func parseInput(g *gocui.Gui, v *gocui.View) error {
 	if len(in) > 1 {
 		for _, r := range [...]rune{'a', 'd', 'h', 'z'} {
 			if strings.ContainsRune(in, r) {
-				PrintPrompt(g, color.Red(color.Regular, promptString))
+				PrintPrompt(g, color.Red)
 				return nil
 			}
 		}

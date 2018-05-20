@@ -4,32 +4,8 @@ import (
 	"fmt"
 
 	"github.com/jroimartin/gocui"
+	"github.com/mkchoi212/fac/color"
 )
-
-var promptString = "[w,a,s,d,?] >>"
-
-func promptEditor(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifier) {
-	switch {
-	case ch != 0 && mod == 0:
-		v.EditWrite(ch)
-	case key == gocui.KeySpace:
-		v.EditWrite(' ')
-	case key == gocui.KeyBackspace || key == gocui.KeyBackspace2:
-		v.EditDelete(true)
-	case key == gocui.KeyDelete:
-		v.EditDelete(false)
-	case key == gocui.KeyInsert:
-		v.Overwrite = !v.Overwrite
-	case key == gocui.KeyArrowDown:
-		v.MoveCursor(0, 1, false)
-	case key == gocui.KeyArrowUp:
-		v.MoveCursor(0, -1, false)
-	case key == gocui.KeyArrowLeft:
-		v.MoveCursor(-1, 0, false)
-	case key == gocui.KeyArrowRight:
-		v.MoveCursor(1, 0, false)
-	}
-}
 
 func globalQuit(g *gocui.Gui) {
 	g.Update(func(g *gocui.Gui) error {
@@ -38,7 +14,12 @@ func globalQuit(g *gocui.Gui) {
 	})
 }
 
-func PrintPrompt(g *gocui.Gui, str string) {
+// PrintPrompt prints the promptString on the bottom left corner of the screen
+// Note that the prompt is composed of two seperate views
+// One that displays just the promptString, and another that takes input from the user
+func PrintPrompt(g *gocui.Gui, colorize func(style int, format string, a ...interface{}) string) {
+	promptString := "[w,a,s,d,?] >>"
+
 	g.Update(func(g *gocui.Gui) error {
 		v, err := g.View(Prompt)
 		if err != nil {
@@ -46,7 +27,7 @@ func PrintPrompt(g *gocui.Gui, str string) {
 		}
 		v.Clear()
 		v.MoveCursor(0, 0, true)
-		fmt.Fprintf(v, str)
+		fmt.Fprintf(v, colorize(color.Regular, promptString))
 		return nil
 	})
 }
