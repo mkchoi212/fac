@@ -45,17 +45,7 @@ func Green(style int, format string, a ...interface{}) string {
 	return colorString(FgGreen, style, format, a...)
 }
 
-// Yellow returns a string with yellow foreground
-func Yellow(style int, format string, a ...interface{}) string {
-	return colorString(FgYellow, style, format, a...)
-}
-
 // Blue returns a string with blue foreground
 func Blue(style int, format string, a ...interface{}) string {
 	return colorString(FgBlue, style, format, a...)
-}
-
-// Purple returns a string with purple foreground
-func Purple(style int, format string, a ...interface{}) string {
-	return colorString(FgPurple, style, format, a...)
 }
