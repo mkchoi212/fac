@@ -1,7 +1,6 @@
 package editor
 
 import (
-	"bufio"
 	"io/ioutil"
 	"strings"
 	"testing"
@@ -10,7 +9,7 @@ import (
 )
 
 func TestUseContentAsReader(t *testing.T) {
-	c, err := contentFromReader(strings.NewReader("foo\nbar"), bufio.ScanLines)
+	c, err := contentFromReader(strings.NewReader("foo\nbar"))
 	testhelper.Ok(t, err)
 
 	byteCnt, err := ioutil.ReadAll(c)
@@ -24,8 +23,8 @@ func TestCreateContentFromFile(t *testing.T) {
 	_, err = f.Write([]byte("foo\nbar"))
 	testhelper.Ok(t, err)
 
-	c, err := contentFromFile(f.Name(), bufio.ScanLines)
+	c, err := contentFromFile(f.Name())
 
-	testhelper.Equals(t, c.c[0], "foo")
-	testhelper.Equals(t, c.c[1], "bar")
+	testhelper.Equals(t, "foo\n", c.c[0])
+	testhelper.Equals(t, "bar", c.c[1])
 }

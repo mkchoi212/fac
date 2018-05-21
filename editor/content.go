@@ -7,7 +7,9 @@ import (
 	"strings"
 )
 
-// Content holds all I/O related logic of the editor
+// Content represents the lines read from a io.Reader
+// `c` holds the actual lines and
+// `reader` contains the io.Reader representation of the lines
 type Content struct {
 	c      []string
 	reader io.Reader
@@ -18,30 +20,40 @@ func (c Content) Read(b []byte) (int, error) {
 }
 
 func (c Content) String() string {
-	return strings.Join(c.c, "\n")
+	return strings.Join(c.c, "")
 }
 
 // contentFromReader creates a new `Content` object
-// by scanning an io.Reader using a bufio.SplitFunc
-func contentFromReader(content io.Reader, split bufio.SplitFunc) (Content, error) {
-	c := Content{}
-	scanner := bufio.NewScanner(content)
-	scanner.Split(split)
+// filled with the lines from the provided Reader
+// It returns an error if anything other than io.EOF is raised
+func contentFromReader(content io.Reader) (c Content, err error) {
+	reader := bufio.NewReader(content)
 
-	for scanner.Scan() {
-		c.c = append(c.c, scanner.Text())
+	for {
+		line, err := reader.ReadString('\n')
+		c.c = append(c.c, line)
+
+		if err != nil {
+			break
+		}
 	}
-	c.reader = strings.NewReader(c.String())
 
-	return c, scanner.Err()
+	if err != nil && err != io.EOF {
+		return
+	}
+
+	c.reader = strings.NewReader(c.String())
+	return
 }
 
-func contentFromFile(filename string, split bufio.SplitFunc) (Content, error) {
+// contentFromFile reads the content from the file
+// It returns an error if the file does not exist
+func contentFromFile(filename string) (Content, error) {
 	file, err := os.Open(filename)
 	if err != nil {
 		return Content{}, err
 	}
 	defer file.Close()
 
-	return contentFromReader(file, split)
+	return contentFromReader(file)
 }

@@ -4,7 +4,6 @@ package editor
 // https://github.com/kioopi/extedit
 
 import (
-	"bufio"
 	"io"
 	"io/ioutil"
 	"os"
@@ -16,19 +15,16 @@ import (
 
 const defaultEditor = "vim"
 
-type Session struct {
-	input     Content
-	SplitFunc bufio.SplitFunc
-}
+var execCommand = exec.Command
 
-// Open starts a text-editor with the contents of content.
-// It returns edited content after user closes the editor
+// Open starts a text-editor with lines from `Content`
+// It returns the manually edited lines from the text-editor when the user closes the editor
 func Open(c *conflict.Conflict) (output []string, err error) {
-	s := &Session{SplitFunc: bufio.ScanLines}
 	lines := c.File.Lines[c.Start : c.End+1]
 
 	content := strings.NewReader(strings.Join(lines, ""))
-	input, err := contentFromReader(content, s.SplitFunc)
+	input, err := contentFromReader(content)
+
 	if err != nil {
 		return
 	}
@@ -44,20 +40,17 @@ func Open(c *conflict.Conflict) (output []string, err error) {
 		return
 	}
 
-	newContent, err := contentFromFile(fileName, s.SplitFunc)
+	newContent, err := contentFromFile(fileName)
 	if err != nil {
 		return
 	}
 
 	output = newContent.c
-	for i := range output {
-		output[i] = output[i] + "\n"
-	}
 	return
 }
 
-// writeTmpFile writes content to a temporary file and returns
-// the path to the file
+// writeTmpFile writes content to a temporary file and returns the path to the file
+// It returns an error if the temporary file cannot be created
 func writeTmpFile(content io.Reader) (string, error) {
 	f, err := ioutil.TempFile("", "")
 	if err != nil {
@@ -69,14 +62,14 @@ func writeTmpFile(content io.Reader) (string, error) {
 	return f.Name(), nil
 }
 
-// editorCmd creates a os/exec.Cmd to open
-// filename in an editor ready to be run()
+// editorCmd returns a os/exec.Cmd to open the provided file
 func editorCmd(filename string) *exec.Cmd {
 	editorPath := os.Getenv("EDITOR")
 	if editorPath == "" {
 		editorPath = defaultEditor
 	}
-	editor := exec.Command(editorPath, filename)
+
+	editor := execCommand(editorPath, filename)
 
 	editor.Stdin = os.Stdin
 	editor.Stdout = os.Stdout
