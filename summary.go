@@ -15,6 +15,7 @@ w - show more lines up
 s - show more lines down
 a - use local version
 d - use incoming version
+e - manually edit code
 
 j - scroll down
 k - scroll up

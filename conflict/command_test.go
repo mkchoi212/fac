@@ -5,8 +5,9 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
-	"strings"
 	"testing"
+
+	"github.com/mkchoi212/fac/testhelper"
 )
 
 var mockValidDirectory = "/"
@@ -40,12 +41,8 @@ func TestHelperProcess(t *testing.T) {
 		os.Exit(0)
 	}
 
-	// MarkerLocation arguements
-	if args == "--no-pager,diff,--check" {
-		allCheckOutput := append([]string{}, loremDiffCheck...)
-		allCheckOutput = append(allCheckOutput, ccDiffCheck...)
-		allCheckOutput = append(allCheckOutput, readmeDiffCheck...)
-		fmt.Fprintf(os.Stdout, strings.Join(allCheckOutput, "\n"))
+	if args == "--no-pager,diff,--name-only,--diff-filter=U" {
+		fmt.Fprintf(os.Stdout, "lorem_ipsum\nassets/README.md\n")
 		os.Exit(0)
 	}
 
@@ -70,10 +67,26 @@ func TestRun(t *testing.T) {
 	for _, test := range commands {
 		stdout, stderr, exitCode := run(test.command, ".", strconv.FormatBool(test.ok))
 
-		if test.ok && exitCode != 0 {
-			t.Errorf("run failed: got %s with exit code %d, expected no errors", stderr, exitCode)
-		} else if !(test.ok) && exitCode == 0 {
-			t.Errorf("run failed: got %s with exit code %d, expected errors", stdout, exitCode)
+		if test.ok {
+			testhelper.Assert(t, exitCode == 0, "expected no errors but got %s", stderr)
+		} else {
+			testhelper.Assert(t, exitCode != 0, "expected errors but got %s", stdout)
+		}
+	}
+}
+
+func TestConflictedFiles(t *testing.T) {
+	execCommand = mockExecCommand
+	defer func() { execCommand = exec.Command }()
+
+	tests := []string{mockValidDirectory, mockInvalidDirectory}
+	for _, test := range tests {
+		out, err := conflictedFiles(test)
+
+		if test == mockValidDirectory {
+			testhelper.Ok(t, err)
+		} else if test == mockInvalidDirectory {
+			testhelper.Assert(t, err != nil, "expected errors but got %s", out)
 		}
 	}
 }
@@ -84,28 +97,12 @@ func TestTopLevelPath(t *testing.T) {
 
 	tests := []string{mockValidDirectory, mockInvalidDirectory}
 	for _, test := range tests {
-		out, err := TopLevelPath(test)
+		out, err := topLevelPath(test)
 
-		if test == mockValidDirectory && err != nil {
-			t.Errorf("TopLevelPath failed: got %s, expected no errors", err.Error())
-		} else if test == mockInvalidDirectory && err == nil {
-			t.Errorf("TopLevelPath failed: got %s, expected errors", out)
-		}
-	}
-}
-
-func TestMarkerLocations(t *testing.T) {
-	execCommand = mockExecCommand
-	defer func() { execCommand = exec.Command }()
-
-	tests := []string{mockValidDirectory, mockInvalidDirectory}
-	for _, test := range tests {
-		out, err := MarkerLocations(test)
-
-		if test == mockValidDirectory && err != nil {
-			t.Errorf("TopLevelPath failed: got %s, expected no errors", err.Error())
-		} else if test == mockInvalidDirectory && err == nil {
-			t.Errorf("TopLevelPath failed: got %s, expected errors", out)
+		if test == mockValidDirectory {
+			testhelper.Ok(t, err)
+		} else if test == mockInvalidDirectory {
+			testhelper.Assert(t, err != nil, "expected errors but got %s", out)
 		}
 	}
 }

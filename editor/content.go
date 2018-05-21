@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-// Content represents a the in- and output of an extedit session.
+// Content holds all I/O related logic of the editor
 type Content struct {
 	c      []string
 	reader io.Reader
@@ -21,7 +21,8 @@ func (c Content) String() string {
 	return strings.Join(c.c, "\n")
 }
 
-// contentFromReader creates a new Content object by scanning an io.Reader using a bufio.SplitFunc
+// contentFromReader creates a new `Content` object
+// by scanning an io.Reader using a bufio.SplitFunc
 func contentFromReader(content io.Reader, split bufio.SplitFunc) (Content, error) {
 	c := Content{}
 	scanner := bufio.NewScanner(content)

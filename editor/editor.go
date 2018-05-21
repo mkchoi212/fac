@@ -1,5 +1,8 @@
 package editor
 
+// The following package has been inspired by
+// https://github.com/kioopi/extedit
+
 import (
 	"bufio"
 	"io"
@@ -15,27 +18,22 @@ const defaultEditor = "vim"
 
 type Session struct {
 	input     Content
-	result    Content
 	SplitFunc bufio.SplitFunc
 }
 
 // Open starts a text-editor with the contents of content.
 // It returns edited content after user closes the editor
-func Open(conf *conflict.Conflict) (output []string, err error) {
-	s := NewSession()
-
-	lines := append([]string{}, conf.LocalLines...)
-	lines = append(lines, "=======\n")
-	lines = append(lines, conf.IncomingLines...)
+func Open(c *conflict.Conflict) (output []string, err error) {
+	s := &Session{SplitFunc: bufio.ScanLines}
+	lines := c.File.Lines[c.Start : c.End+1]
 
 	content := strings.NewReader(strings.Join(lines, ""))
 	input, err := contentFromReader(content, s.SplitFunc)
-
 	if err != nil {
 		return
 	}
 
-	fileName, err := writeTmpFile(input)
+	fileName, err := writeTmpFile(input.reader)
 	if err != nil {
 		return
 	}
@@ -52,19 +50,16 @@ func Open(conf *conflict.Conflict) (output []string, err error) {
 	}
 
 	output = newContent.c
-
+	for i := range output {
+		output[i] = output[i] + "\n"
+	}
 	return
-}
-
-func NewSession() *Session {
-	return &Session{SplitFunc: bufio.ScanLines}
 }
 
 // writeTmpFile writes content to a temporary file and returns
 // the path to the file
 func writeTmpFile(content io.Reader) (string, error) {
 	f, err := ioutil.TempFile("", "")
-
 	if err != nil {
 		return "", err
 	}

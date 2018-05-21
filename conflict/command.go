@@ -50,18 +50,24 @@ func run(name string, dir string, args ...string) (stdout string, stderr string,
 	return
 }
 
-// MarkerLocations returns line numbers of all git conflict markers
-func MarkerLocations(cwd string) ([]string, error) {
-	stdout, stderr, _ := run("git", cwd, "--no-pager", "diff", "--check")
+// conflictedFiles returns a list of conflicted files
+func conflictedFiles(cwd string) ([]string, error) {
+	stdout, stderr, _ := run("git", cwd, "--no-pager", "diff", "--name-only", "--diff-filter=U")
 
 	if len(stderr) != 0 {
 		return nil, errors.New(stderr)
 	}
+
+	stdout = strings.TrimSuffix(stdout, "\n")
+	if stdout == "" {
+		return []string{}, nil
+	}
+
 	return strings.Split(stdout, "\n"), nil
 }
 
-// TopLevelPath finds the top level path of the current git repository
-func TopLevelPath(cwd string) (string, error) {
+// topLevelPath finds the top level path of the current git repository
+func topLevelPath(cwd string) (string, error) {
 	stdout, stderr, _ := run("git", cwd, "rev-parse", "--show-toplevel")
 
 	if len(stderr) != 0 {

@@ -3,6 +3,9 @@ package conflict
 import (
 	"reflect"
 	"testing"
+
+	"github.com/mkchoi212/fac/color"
+	"github.com/mkchoi212/fac/testhelper"
 )
 
 var dummyFile = struct {
@@ -28,42 +31,23 @@ var dummyFile = struct {
 	},
 	start:  0,
 	diff3:  []int{3},
-	middle: 6,
+	middle: 5,
 	end:    9,
 }
 
-func TestIdentifyStyle(t *testing.T) {
-	styles := []int{}
-
-	for _, line := range dummyFile.lines {
-		style := IdentifyStyle(line)
-		if style != text {
-			styles = append(styles, style)
-		}
-	}
-
-	expected := []int{start, diff3, separator, end}
-	if !(reflect.DeepEqual(styles, expected)) {
-		t.Errorf("IdentifyStyle failed: got %v, want %v", styles, expected)
-	}
-}
-
 func TestValidConflict(t *testing.T) {
-	invalid := Conflict{CurrentName: "foobar"}
-	if invalid.Valid() {
-		t.Errorf("Valid failed: got %t, want %t", true, false)
+	invalid := Conflict{
+		Start: 2,
+		End:   8,
 	}
+	testhelper.Assert(t, !invalid.Valid(), "%s should be invalid", invalid)
 
 	valid := Conflict{
-		File:        &File{},
-		CurrentName: "foo",
-		ForeignName: "bar",
-		Middle:      4,
-		End:         8,
+		Start:  2,
+		Middle: 4,
+		End:    8,
 	}
-	if !(valid.Valid()) {
-		t.Errorf("Valid failed: got %t, want %t", false, true)
-	}
+	testhelper.Assert(t, valid.Valid(), "%s should be valid", invalid)
 }
 
 func TestExtract(t *testing.T) {
@@ -74,28 +58,44 @@ func TestExtract(t *testing.T) {
 		Diff3:  dummyFile.diff3,
 	}
 
-	if err := c.Extract(dummyFile.lines); err != nil {
-		t.Errorf("Extract failed: could not parse file lines")
-	}
+	err := c.Extract(dummyFile.lines)
+	testhelper.Ok(t, err)
 
 	expectedCurrentName := "Updated"
-	if expectedCurrentName != c.CurrentName {
-		t.Errorf("Extract failed: got %s want %s", c.CurrentName, expectedCurrentName)
-	}
+	testhelper.Equals(t, expectedCurrentName, c.CurrentName)
 
 	expectedForeignName := "Stashed"
-	if expectedForeignName != c.ForeignName {
-		t.Errorf("Extract failed: got %s want %s", c.ForeignName, expectedForeignName)
-	}
+	testhelper.Equals(t, expectedForeignName, c.ForeignName)
 
 	expectedIncoming := dummyFile.lines[dummyFile.middle+1 : dummyFile.end]
-	if !(reflect.DeepEqual(c.IncomingLines, expectedIncoming)) {
-		t.Errorf("Extract failed: got %v want %v", c.IncomingLines, expectedIncoming)
-	}
+	testhelper.Equals(t, expectedIncoming, c.IncomingLines)
 
 	expectedPureIncoming := dummyFile.lines[dummyFile.start+1 : dummyFile.diff3[0]]
-	if !(reflect.DeepEqual(c.LocalPureLines, expectedPureIncoming)) {
-		t.Errorf("Extract failed: got %v want %v", c.LocalPureLines, expectedPureIncoming)
+	testhelper.Equals(t, expectedPureIncoming, c.LocalPureLines)
+}
+
+func TestUpdate(t *testing.T) {
+	for _, test := range tests {
+		// Read "manually written" lines
+		f := File{AbsolutePath: test.path}
+		err := f.Read()
+		testhelper.Ok(t, err)
+
+		// Ignore files with more than one conflicts
+		// to simulate manual edit
+		if test.numConflicts > 1 {
+			continue
+		}
+
+		// Update empty `Conflict`
+		c := Conflict{File: &f}
+		err = c.Update(f.Lines)
+
+		if test.shouldPass {
+			testhelper.Ok(t, err)
+		} else {
+			testhelper.Assert(t, err != nil, "%s should not have passed", f)
+		}
 	}
 }
 
@@ -106,13 +106,8 @@ func TestEqual(t *testing.T) {
 	c1, c2 := Conflict{Start: 45, File: &foo}, Conflict{Start: 45, File: &foo}
 	c3 := Conflict{Start: 45, File: &bar}
 
-	if c1.Equal(&c2) != true {
-		t.Errorf("Equal failed: got %t, want %t", false, true)
-	}
-
-	if c1.Equal(&c3) != false {
-		t.Errorf("Equal failed: got %t, want %t", true, false)
-	}
+	testhelper.Assert(t, c1.Equal(&c2), "%s and %s should be equal", c1, c2)
+	testhelper.Assert(t, !(c1.Equal(&c3)), "%s and %s should not be equal", c1, c2)
 }
 
 func TestPaddingLines(t *testing.T) {
@@ -124,43 +119,38 @@ func TestPaddingLines(t *testing.T) {
 	}
 
 	top, bottom := c.PaddingLines()
-	if len(top) != 0 || len(bottom) != 0 {
-		t.Errorf("PaddingLines failed: got %d, %d lines, want 0, 0 lines", len(top), len(bottom))
-	}
+	testhelper.Assert(t, len(top) == 0 && len(bottom) == 0, "top and bottom peak should initially be 0")
 
 	c.TopPeek--
 	c.BottomPeek++
 	top, bottom = c.PaddingLines()
-	expectedBottom := f.Lines[dummyFile.end+1]
-	if len(top) != 0 || reflect.DeepEqual(bottom, expectedBottom) {
-		t.Errorf("PaddingLines failed: got %v, want %v", bottom, expectedBottom)
-	}
+	expectedBottom := color.Black(color.Regular, f.Lines[dummyFile.end])
 
+	testhelper.Equals(t, len(top), 0)
+	testhelper.Equals(t, len(bottom), 1)
+	testhelper.Equals(t, bottom[0], expectedBottom)
 }
 
 func TestHighlight(t *testing.T) {
 	for _, test := range tests {
 		f := File{AbsolutePath: test.path, Name: test.path}
+		err := f.Read()
+		testhelper.Ok(t, err)
 
-		if err := f.Read(); err != nil && test.highlightable {
-			t.Error("conflict/Read failed")
-		}
-
-		conflicts, err := parseConflictsIn(f, test.markers)
-		if err != nil {
-			if !test.shouldPass {
-				continue
-			}
-			t.Error("conflict/parseConflicts failed")
+		conflicts, err := ExtractConflictsIn(f)
+		if test.shouldPass {
+			testhelper.Ok(t, err)
+		} else {
+			testhelper.Assert(t, err != nil, "%s is not parsable", f)
 		}
 
 		for _, c := range conflicts {
-			if err := c.HighlightSyntax(); err != nil {
-				t.Errorf("HighlightSyntax failed: %s", err.Error())
-			}
+			_ = c.HighlightSyntax()
 
-			if test.highlightable && reflect.DeepEqual(c.IncomingLines, c.ColoredIncomingLines) {
-				t.Errorf("HighlightSyntax failed: %s has not been highlighted", f.Name)
+			if test.highlightable {
+				testhelper.Assert(t, !reflect.DeepEqual(c.IncomingLines, c.ColoredIncomingLines), "%s should be highlighted", f)
+			} else {
+				testhelper.Equals(t, c.IncomingLines, c.ColoredIncomingLines)
 			}
 		}
 	}

@@ -2,6 +2,7 @@ package conflict
 
 import (
 	"bytes"
+	"errors"
 	"sort"
 	"strings"
 
@@ -35,42 +36,17 @@ type Conflict struct {
 	BottomPeek int
 }
 
-// Supported git conflict styles
-const (
-	text = iota
-	start
-	diff3
-	separator
-	end
-)
-
 const (
 	Local    = 1
 	Incoming = 2
 )
 
-// IdentifyStyle identifies the conflict marker style of provided text
-func IdentifyStyle(line string) (style int) {
-	line = strings.TrimSpace(line)
-
-	if strings.Contains(line, "<<<<<<<") {
-		style = start
-	} else if strings.Contains(line, ">>>>>>>") {
-		style = end
-	} else if line == "||||||| merged common ancestors" {
-		style = diff3
-	} else if line == "=======" {
-		style = separator
-	} else {
-		style = text
-	}
-	return
-}
+var ErrInvalidManualInput = errors.New("Newly edited code is invalid")
 
 // Valid checks if the parsed conflict has corresponding begin, separator,
 // and middle line numbers
 func (c *Conflict) Valid() bool {
-	return c.File != nil && c.Middle != 0 && c.End != 0
+	return c.Start != -1 && c.Middle != 0 && c.End != 0
 }
 
 // Equal checks if two `Conflict`s are equal
@@ -93,6 +69,30 @@ func (c *Conflict) Extract(lines []string) error {
 	c.CurrentName = strings.Split(lines[c.Start], " ")[1]
 	c.ForeignName = strings.Split(lines[c.End], " ")[1]
 	return nil
+}
+
+// Update takes the user's input from an editor and updates the current
+// representation of `Conflict`
+func (c *Conflict) Update(incoming []string) (err error) {
+	conflicts, err := GroupConflictMarkers(incoming)
+	if err != nil || len(conflicts) != 1 {
+		return ErrInvalidManualInput
+	}
+
+	updated := conflicts[0]
+	if err = updated.Extract(incoming); err != nil {
+		return
+	}
+
+	updated.File = c.File
+	if err = updated.HighlightSyntax(); err != nil {
+		return
+	}
+
+	c.IncomingLines, c.ColoredIncomingLines = updated.IncomingLines, updated.ColoredIncomingLines
+	c.LocalLines, c.ColoredLocalLines = updated.LocalLines, updated.ColoredLocalLines
+	c.LocalPureLines = updated.LocalPureLines
+	return
 }
 
 // PaddingLines returns top and bottom padding lines based on
@@ -156,7 +156,7 @@ func (c *Conflict) HighlightSyntax() error {
 tokenizer:
 	for i, block := range [][]string{c.LocalLines, c.IncomingLines} {
 		for _, line := range block {
-			if IdentifyStyle(line) == diff3 {
+			if identifyStyle(line) == diff3 {
 				colorLine = color.Red(color.Regular, line)
 			} else {
 				if it, err = lexer.Tokenise(nil, line); err != nil {
