@@ -39,6 +39,7 @@ func layout(g *gocui.Gui) (err error) {
 	if err = makePrompt(g); err != nil {
 		return
 	}
+
 	return
 }
 

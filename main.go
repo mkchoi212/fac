@@ -74,6 +74,7 @@ func Start() (err error) {
 	}
 
 	Select(conflicts[cur], g, false)
+
 	if err = g.MainLoop(); err != nil {
 		return
 	}
@@ -89,16 +90,17 @@ func main() {
 		fmt.Println(color.Red(color.Regular, err.Error()))
 		return
 	}
-	if len(files) == 0 {
-		fmt.Println(color.Green(color.Regular, "No conflicts detected 🎉"))
-		return
-	}
 
 	for i := range files {
 		file := &files[i]
 		for j := range file.Conflicts {
 			conflicts = append(conflicts, &file.Conflicts[j])
 		}
+	}
+
+	if len(conflicts) == 0 {
+		fmt.Println(color.Green(color.Regular, "No conflicts detected 🎉"))
+		return
 	}
 
 	// Main GUI loop
