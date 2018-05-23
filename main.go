@@ -8,6 +8,7 @@ import (
 	"github.com/jroimartin/gocui"
 	"github.com/mkchoi212/fac/color"
 	"github.com/mkchoi212/fac/conflict"
+	"github.com/mkchoi212/fac/editor"
 )
 
 var (
@@ -33,25 +34,25 @@ func quit(g *gocui.Gui, v *gocui.View) error {
 	return gocui.ErrQuit
 }
 
-func parseInput(g *gocui.Gui, v *gocui.View) (err error) {
+func parseInput(g *gocui.Gui, v *gocui.View) error {
 	in := strings.TrimSuffix(v.Buffer(), "\n")
 	v.Clear()
 	v.SetCursor(0, 0)
 
-	if err = Evaluate(g, v, conflicts[cur], in); err != nil {
+	if err := Evaluate(g, v, conflicts[cur], in); err != nil {
 		if err == ErrUnknownCmd {
 			consecutiveError++
-			PrintPrompt(g, color.Red)
-
 			if consecutiveError > 3 {
 				Select(conflicts[cur], g, true)
-				consecutiveError = 0
 			}
 		} else {
-			return
+			return err
 		}
+	} else {
+		consecutiveError = 0
 	}
 
+	PrintPrompt(g)
 	return nil
 }
 
@@ -82,12 +83,13 @@ func Start() (err error) {
 	return
 }
 
-func main() {
-	// Find and parse conflicts
-	cwd, _ := os.Getwd()
-	files, err := conflict.Find(cwd)
+func findConflicts() (files []conflict.File, err error) {
+	cwd, err := os.Getwd()
 	if err != nil {
-		fmt.Println(color.Red(color.Regular, err.Error()))
+		return
+	}
+
+	if files, err = conflict.Find(cwd); err != nil {
 		return
 	}
 
@@ -98,26 +100,55 @@ func main() {
 		}
 	}
 
-	if len(conflicts) == 0 {
-		fmt.Println(color.Green(color.Regular, "No conflicts detected 🎉"))
-		return
-	}
+	return
+}
 
-	// Main GUI loop
+func runUI() error {
 	for {
 		if err := Start(); err != nil {
-			if err == gocui.ErrQuit {
+			if err == ErrOpenEditor {
+				newLines, err := editor.Open(conflicts[cur])
+				if err != nil {
+					return err
+				}
+				if err = conflicts[cur].Update(newLines); err != nil {
+					consecutiveError++
+				}
+			} else if err == gocui.ErrQuit {
 				break
-			} else if err == ErrNeedRefresh {
-				continue
 			}
 		}
 	}
 
+	return nil
+}
+
+func die(err error) {
+	fmt.Println(color.Red(color.Regular, "fac: %s", strings.TrimSuffix(err.Error(), "\n")))
+	os.Exit(1)
+}
+
+func main() {
+	// Find and parse conflicts
+	files, err := findConflicts()
+	if err != nil {
+		die(err)
+	}
+
+	if len(conflicts) == 0 {
+		fmt.Println(color.Green(color.Regular, "No conflicts detected 🎉"))
+		os.Exit(0)
+	}
+
+	if err = runUI(); err != nil {
+		die(err)
+	}
+
 	for _, file := range files {
 		if err = file.WriteChanges(); err != nil {
-			fmt.Println(color.Red(color.Underline, "%s\n", err))
+			die(err)
 		}
 	}
+
 	printSummary(conflicts)
 }

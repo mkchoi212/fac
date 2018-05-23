@@ -7,20 +7,19 @@ import (
 	"github.com/jroimartin/gocui"
 	"github.com/mkchoi212/fac/color"
 	"github.com/mkchoi212/fac/conflict"
-	"github.com/mkchoi212/fac/editor"
 )
 
 // ErrUnknownCmd is returned when user inputs an invalid character
 var ErrUnknownCmd = errors.New("This person doesn't know whats going on")
 
-// ErrNeedRefresh is returned when the user opens vim to edit code
-// Note that a new instance of gocui must be created after vim is opened
-var ErrNeedRefresh = errors.New("Screen is tainted after opening vim")
+// ErrOpenEditor is returned when the user wants to open an editor
+// Note that the current instance of gocui must be destroyed before opening an editor
+var ErrOpenEditor = errors.New("Screen is tainted after opening vim")
 
 // PrintPrompt prints the promptString on the bottom left corner of the screen
 // Note that the prompt is composed of two seperate views,
 // one that displays just the promptString, and another that takes input from the user
-func PrintPrompt(g *gocui.Gui, colorize func(style int, format string, a ...interface{}) string) {
+func PrintPrompt(g *gocui.Gui) {
 	promptString := "[w,a,s,d,e,?] >>"
 
 	g.Update(func(g *gocui.Gui) error {
@@ -30,7 +29,12 @@ func PrintPrompt(g *gocui.Gui, colorize func(style int, format string, a ...inte
 		}
 		v.Clear()
 		v.MoveCursor(0, 0, true)
-		fmt.Fprintf(v, colorize(color.Regular, promptString))
+
+		if consecutiveError == 0 {
+			fmt.Fprintf(v, color.Green(color.Regular, promptString))
+		} else {
+			fmt.Fprintf(v, color.Red(color.Regular, promptString))
+		}
 		return nil
 	})
 }
@@ -63,12 +67,7 @@ func Evaluate(g *gocui.Gui, v *gocui.View, conf *conflict.Conflict, input string
 			ViewOrientation = ^ViewOrientation
 			layout(g)
 		case 'e':
-			newLines, err := editor.Open(conflicts[cur])
-			if err != nil {
-				return err
-			}
-			conflicts[cur].Update(newLines)
-			return ErrNeedRefresh
+			return ErrOpenEditor
 		case 'h', '?':
 			Select(conflicts[cur], g, true)
 		case 'q':

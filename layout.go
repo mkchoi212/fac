@@ -112,7 +112,7 @@ func makePrompt(g *gocui.Gui) error {
 			return err
 		}
 		v.Frame = false
-		PrintPrompt(g, color.Green)
+		PrintPrompt(g)
 	}
 
 	// User input view
