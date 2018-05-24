@@ -18,9 +18,9 @@
 </p>
 <br>
 
-I never really liked any of the `mergetools` out there so I made a program that is somewhat easy to use.
+I never really liked any of the `mergetools` out there so I made a program that is somewhat easier to use.
 
-![](https://i.imgur.com/j4CgN8w.gif)
+![Preview](https://i.imgur.com/GsJMRIp.gif)
 
 ## 👷 Installation
 
