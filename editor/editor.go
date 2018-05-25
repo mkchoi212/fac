@@ -64,12 +64,21 @@ func writeTmpFile(content io.Reader) (string, error) {
 
 // editorCmd returns a os/exec.Cmd to open the provided file
 func editorCmd(filename string) *exec.Cmd {
-	editorPath := os.Getenv("EDITOR")
-	if editorPath == "" {
-		editorPath = defaultEditor
+	editorEnv := os.Getenv("EDITOR")
+	if editorEnv == "" {
+		editorEnv = defaultEditor
 	}
 
-	editor := execCommand(editorPath, filename)
+	editorVars := strings.Split(editorEnv, " ")
+
+	path := editorVars[0]
+	args := []string{filename}
+
+	if len(editorVars) > 1 {
+		args = append(editorVars[1:], args...)
+	}
+
+	editor := execCommand(path, args...)
 
 	editor.Stdin = os.Stdin
 	editor.Stdout = os.Stdout

@@ -11,8 +11,15 @@ import (
 )
 
 func TestEditorCmd(t *testing.T) {
-	editor := editorCmd(".")
+	os.Setenv("EDITOR", "")
+	editor := editorCmd("foobar")
 	testhelper.Assert(t, editor != nil, "editor should not be nil")
+	testhelper.Equals(t, editor.Args, []string{"vim", "foobar"})
+
+	os.Setenv("EDITOR", "subl -w")
+	editor = editorCmd("foobar")
+	testhelper.Assert(t, editor != nil, "editor should not be nil")
+	testhelper.Equals(t, editor.Args, []string{"subl", "-w", "foobar"})
 }
 
 func TestWriteTmpFile(t *testing.T) {
