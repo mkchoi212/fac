@@ -9,12 +9,14 @@ import (
 	"github.com/mkchoi212/fac/color"
 	"github.com/mkchoi212/fac/conflict"
 	"github.com/mkchoi212/fac/editor"
+	"github.com/mkchoi212/fac/key"
 )
 
 var (
 	conflicts        = []*conflict.Conflict{}
 	cur              = 0
 	consecutiveError = 0
+	binding          = key.Binding{}
 )
 
 func printLines(v *gocui.View, lines []string) {
@@ -129,6 +131,13 @@ func die(err error) {
 }
 
 func main() {
+	var err error
+
+	binding, err = key.LoadSettings()
+	if err != nil {
+		die(err)
+	}
+
 	// Find and parse conflicts
 	files, err := findConflicts()
 	if err != nil {

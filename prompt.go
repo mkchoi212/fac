@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/mkchoi212/fac/key"
+
 	"github.com/jroimartin/gocui"
 	"github.com/mkchoi212/fac/color"
 	"github.com/mkchoi212/fac/conflict"
@@ -20,7 +22,7 @@ var ErrOpenEditor = errors.New("Screen is tainted after opening vim")
 // Note that the prompt is composed of two seperate views,
 // one that displays just the promptString, and another that takes input from the user
 func PrintPrompt(g *gocui.Gui) {
-	promptString := "[w,a,s,d,e,?] >>"
+	promptString := binding.Summary()
 
 	g.Update(func(g *gocui.Gui) error {
 		v, err := g.View(Prompt)
@@ -44,33 +46,33 @@ func PrintPrompt(g *gocui.Gui) {
 // It also returns `ErrNeedRefresh` if user uses `e` command to open vim
 func Evaluate(g *gocui.Gui, v *gocui.View, conf *conflict.Conflict, input string) (err error) {
 	for _, c := range input {
-		switch c {
-		case 'j':
+		switch string(c) {
+		case binding[key.ScrollUp]:
 			Scroll(g, conflicts[cur], Up)
-		case 'k':
+		case binding[key.ScrollDown]:
 			Scroll(g, conflicts[cur], Down)
-		case 'w':
+		case binding[key.ShowLinesUp]:
 			conflicts[cur].TopPeek++
 			Select(conflicts[cur], g, false)
-		case 's':
+		case binding[key.ShowLinesDown]:
 			conflicts[cur].BottomPeek++
 			Select(conflicts[cur], g, false)
-		case 'a':
+		case binding[key.SelectLocal]:
 			Resolve(conflicts[cur], g, v, conflict.Local)
-		case 'd':
+		case binding[key.SelectIncoming]:
 			Resolve(conflicts[cur], g, v, conflict.Incoming)
-		case 'n':
+		case binding[key.NextConflict]:
 			MoveToItem(Down, g, v)
-		case 'p':
+		case binding[key.PreviousConflict]:
 			MoveToItem(Up, g, v)
-		case 'v':
+		case binding[key.ToggleViewOrientation]:
 			ViewOrientation = ^ViewOrientation
 			layout(g)
-		case 'e':
+		case binding[key.EditCode]:
 			return ErrOpenEditor
-		case 'h', '?':
+		case binding[key.ShowHelp], "?":
 			Select(conflicts[cur], g, true)
-		case 'q':
+		case binding[key.QuitApplication]:
 			globalQuit(g)
 		default:
 			return ErrUnknownCmd
