@@ -3,6 +3,8 @@ package color
 import (
 	"os"
 	"testing"
+
+	"github.com/mkchoi212/fac/testhelper"
 )
 
 // Setup tests
@@ -15,15 +17,15 @@ var tests = []struct {
 	{Red, []string{"%s %s", "foobar", "hey"}, "\033[31;1mfoobar hey[0m"},
 	{Green, []string{"%s", ""}, "\033[32;1m[0m"},
 	{Blue, []string{"foobar"}, "\033[34;1mfoobar[0m"},
+	{Yellow, []string{"foobar"}, "\033[33;1mfoobar[0m"},
 }
 
 func TestColors(t *testing.T) {
 	// Redirect stdout
 	oldStdout := os.Stdout
 	_, w, err := os.Pipe()
-	if err != nil {
-		t.Fatalf("ColorString failed to redirect stdout because %s", err.Error())
-	}
+	testhelper.Ok(t, err)
+
 	os.Stdout = w
 
 	// Restore old stdout
@@ -47,8 +49,6 @@ func TestColors(t *testing.T) {
 			out = test.color(Regular, test.input[0], s...)
 		}
 
-		if test.expected != out {
-			t.Errorf("Color failed: got %s, want %s", out, test.expected)
-		}
+		testhelper.Equals(t, test.expected, out)
 	}
 }
