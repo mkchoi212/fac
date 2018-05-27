@@ -65,23 +65,20 @@
   version = "v0.0.2"
 
 [[projects]]
-  name = "github.com/mkchoi212/fac"
-  packages = [
-    "color",
-    "conflict"
-  ]
-  revision = "15e5119bfc37d9338ad2382bd2a3188165aed29a"
-  version = "v1.0.4"
-
-[[projects]]
   branch = "master"
   name = "github.com/nsf/termbox-go"
   packages = ["."]
   revision = "e2050e41c8847748ec5288741c0b19a8cb26d084"
 
+[[projects]]
+  name = "gopkg.in/yaml.v2"
+  packages = ["."]
+  revision = "5420a8b6744d3b0345ab293f6fcba19c978f1183"
+  version = "v2.2.1"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "12a02c8a40ca5d6103ba2fcb8dcd82fd6b34470c7a12fc5e7f5ee14c36169077"
+  inputs-digest = "718867290c9fedc09fe38e3e33673657be421d1bb1019febd0428b784c437be9"
   solver-name = "gps-cdcl"
   solver-version = 1
