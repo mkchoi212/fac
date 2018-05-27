@@ -19,6 +19,7 @@ dist
 
 # Dummy conflict code
 conflict/testdata/.test_output
+key/.fac.yml
 
 ### Code ###
 # Visual Studio Code - https://code.visualstudio.com/
