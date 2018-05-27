@@ -63,7 +63,10 @@ q | Ctrl+c - [q]uit
 [w,a,s,d,?] >> [INPUT HERE]
 ```
 
-> The movement controls have been derived from both the world of gamers (WASD) and VIM users (HJKL).
+### ⚙️ Customization
+
+The above key-bindings can be altered by creating a `.fac.yml` file in your home directory.
+Please refer to the [configuration README.md](./key/README.md) for more information.
 
 ## ✋ Contributing
 
