@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/user"
 	"sort"
+	"strings"
 	"testing"
 
 	"gopkg.in/yaml.v2"
@@ -66,10 +67,6 @@ func TestLoadSettings(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		if test.fatals != nil {
-			continue
-		}
-
 		// Create dummy yml file with content
 		f, err := os.Create(".fac.yml")
 		testhelper.Ok(t, err)
@@ -78,10 +75,16 @@ func TestLoadSettings(t *testing.T) {
 		f.Close()
 
 		output, err := LoadSettings()
-		testhelper.Ok(t, err)
-
-		test.expected.consolidate()
-		testhelper.Equals(t, test.expected, output)
+		if len(test.fatals) == 0 {
+			testhelper.Ok(t, err)
+			test.expected.consolidate()
+			testhelper.Equals(t, test.expected, output)
+		} else {
+			testhelper.Assert(t, err != nil, "%v should fail", test)
+			for _, msg := range test.fatals {
+				testhelper.Assert(t, strings.Contains(err.Error(), msg), "Error message should contain message %s", msg)
+			}
+		}
 	}
 }
 
@@ -90,14 +93,14 @@ func TestParseSettings(t *testing.T) {
 	currentUser = func() (*user.User, error) {
 		return nil, errors.New("Could not find current user")
 	}
-	binding, _ := parseSettings()
+	binding := parseSettings()
 	testhelper.Equals(t, defaultBinding, binding)
 
 	// Test with invalid directory
 	currentUser = func() (*user.User, error) {
 		return &user.User{HomeDir: "foobar"}, nil
 	}
-	binding, _ = parseSettings()
+	binding = parseSettings()
 	testhelper.Equals(t, defaultBinding, binding)
 
 	// Test with valid directory with empty file
@@ -108,12 +111,12 @@ func TestParseSettings(t *testing.T) {
 	testhelper.Ok(t, err)
 	defer f.Close()
 
-	binding, _ = parseSettings()
+	binding = parseSettings()
 	testhelper.Equals(t, 0, len(binding))
 
 	// Test valid directory with erroneous content
 	f.WriteString("erroneous content")
-	binding, _ = parseSettings()
+	binding = parseSettings()
 	testhelper.Equals(t, defaultBinding, binding)
 }
 

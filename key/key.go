@@ -1,9 +1,10 @@
 package key
 
 import (
+	"bytes"
+	"errors"
 	"fmt"
 	"io/ioutil"
-	"os"
 	"os/user"
 	"sort"
 	"strings"
@@ -57,18 +58,16 @@ var defaultBinding = Binding{
 // and returns a map representation of the file
 // It also looks for errors, and ambiguities within the file and notifies the user of them
 func LoadSettings() (b Binding, err error) {
-	b, err = parseSettings()
-	if err != nil {
-		return
-	}
-
+	b = parseSettings()
 	warnings, fatals := b.verify()
+
 	if len(fatals) != 0 {
-		fmt.Println(color.Red(color.Regular, "🚫  %d unrecoverable error(s) detected in .fac.yml\n", len(fatals)))
+		var errorMsg bytes.Buffer
+		errorMsg.WriteString(color.Red(color.Regular, "🚫  %d unrecoverable error(s) detected in .fac.yml\n", len(fatals)))
 		for _, msg := range fatals {
-			fmt.Println(color.Red(color.Regular, "%s", msg))
+			errorMsg.WriteString(color.Red(color.Regular, "\n%s", msg))
 		}
-		os.Exit(1)
+		return nil, errors.New(errorMsg.String())
 	}
 
 	if len(warnings) != 0 {
@@ -86,25 +85,26 @@ func LoadSettings() (b Binding, err error) {
 
 // parseSettings looks for `$HOME/.fac.yml` and parses it into a `Binding` value
 // If the file does not exist, it returns the `defaultBinding`
-func parseSettings() (b Binding, err error) {
+func parseSettings() (b Binding) {
 	usr, err := currentUser()
 	if err != nil {
 		fmt.Println(color.Yellow(color.Regular, "fac: %s. Default key-bindings will be used", err.Error()))
-		return defaultBinding, nil
+		return defaultBinding
 	}
 
 	// Read config file
 	f, err := ioutil.ReadFile(usr.HomeDir + "/.fac.yml")
 	if err != nil {
 		fmt.Println(color.Yellow(color.Regular, "fac: %s. Default key-bindings will be used", err.Error()))
-		return defaultBinding, nil
+		return defaultBinding
 	}
 
 	// Parse config file
 	if err = yaml.Unmarshal(f, &b); err != nil {
 		fmt.Println(color.Yellow(color.Regular, "fac: %s. Default key-bindings will be used", err.Error()))
-		return defaultBinding, nil
+		return defaultBinding
 	}
+
 	return
 }
 
