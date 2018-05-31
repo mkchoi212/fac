@@ -85,7 +85,9 @@ func LoadSettings() (b Binding, err error) {
 
 // parseSettings looks for `$HOME/.fac.yml` and parses it into a `Binding` value
 // If the file does not exist, it returns the `defaultBinding`
-func parseSettings() (b Binding) {
+func parseSettings() Binding {
+	b := make(Binding)
+
 	usr, err := currentUser()
 	if err != nil {
 		fmt.Println(color.Yellow(color.Regular, "fac: %s. Default key-bindings will be used", err.Error()))
@@ -105,7 +107,7 @@ func parseSettings() (b Binding) {
 		return defaultBinding
 	}
 
-	return
+	return b
 }
 
 // consolidate takes the user's key-binding settings and fills the missings key-binds
