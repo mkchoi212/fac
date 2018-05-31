@@ -27,8 +27,7 @@ func printLines(v *gocui.View, lines []string) {
 
 func globalQuit(g *gocui.Gui) {
 	g.Update(func(g *gocui.Gui) error {
-		v, _ := g.View("")
-		return quit(g, v)
+		return gocui.ErrQuit
 	})
 }
 
