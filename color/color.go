@@ -4,6 +4,7 @@ import (
 	"fmt"
 )
 
+// Defines the color of the text
 const (
 	FgBlack = iota
 	FgRed
@@ -13,6 +14,7 @@ const (
 	FgPurple
 )
 
+// Defines the style of the text
 const (
 	Regular = iota + 1
 	Light
@@ -20,7 +22,9 @@ const (
 	Underline
 )
 
-func colorString(color int, style int, format string, a ...interface{}) string {
+// Apply applies a `color` and a `style` to the provided `format`
+// It does this by using ANSI color codes
+func Apply(color int, style int, format string, a ...interface{}) string {
 	var str string
 	if len(a) == 0 {
 		str = format
@@ -32,25 +36,25 @@ func colorString(color int, style int, format string, a ...interface{}) string {
 
 // Red returns a string with red foreground
 func Red(style int, format string, a ...interface{}) string {
-	return colorString(FgRed, style, format, a...)
+	return Apply(FgRed, style, format, a...)
 }
 
 // Yellow returns a string with red foreground
 func Yellow(style int, format string, a ...interface{}) string {
-	return colorString(FgYellow, style, format, a...)
+	return Apply(FgYellow, style, format, a...)
 }
 
 // Green returns a string with green foreground
 func Green(style int, format string, a ...interface{}) string {
-	return colorString(FgGreen, style, format, a...)
+	return Apply(FgGreen, style, format, a...)
 }
 
 // Blue returns a string with blue foreground
 func Blue(style int, format string, a ...interface{}) string {
-	return colorString(FgBlue, style, format, a...)
+	return Apply(FgBlue, style, format, a...)
 }
 
 // Black returns a string with black foreground
 func Black(style int, format string, a ...interface{}) string {
-	return colorString(FgBlack, style, format, a...)
+	return Apply(FgBlack, style, format, a...)
 }
