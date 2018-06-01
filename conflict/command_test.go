@@ -35,7 +35,7 @@ func TestHelperProcess(t *testing.T) {
 		os.Exit(1)
 	}
 
-	// TopLevelPath arguements
+	// TopLevelPath arguments
 	if args == "rev-parse,--show-toplevel" {
 		fmt.Fprintf(os.Stdout, "testdata")
 		os.Exit(0)

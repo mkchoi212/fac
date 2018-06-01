@@ -24,7 +24,7 @@ func TestCreateContentFromFile(t *testing.T) {
 	testhelper.Ok(t, err)
 
 	c, err := contentFromFile(f.Name())
-
+	testhelper.Ok(t, err)
 	testhelper.Equals(t, "foo\n", c.c[0])
 	testhelper.Equals(t, "bar", c.c[1])
 }

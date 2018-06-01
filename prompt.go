@@ -19,7 +19,7 @@ var ErrUnknownCmd = errors.New("This person doesn't know whats going on")
 var ErrOpenEditor = errors.New("Screen is tainted after opening vim")
 
 // PrintPrompt prints the promptString on the bottom left corner of the screen
-// Note that the prompt is composed of two seperate views,
+// Note that the prompt is composed of two separate views,
 // one that displays just the promptString, and another that takes input from the user
 func PrintPrompt(g *gocui.Gui) {
 	promptString := binding.Summary()
