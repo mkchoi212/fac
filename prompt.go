@@ -32,7 +32,7 @@ func PrintPrompt(g *gocui.Gui) {
 		v.Clear()
 		v.MoveCursor(0, 0, true)
 
-		if consecutiveError == 0 {
+		if consecutiveErrCnt == 0 {
 			fmt.Fprintf(v, color.Green(color.Regular, promptString))
 		} else {
 			fmt.Fprintf(v, color.Red(color.Regular, promptString))
@@ -53,25 +53,25 @@ func Evaluate(g *gocui.Gui, v *gocui.View, conf *conflict.Conflict, input string
 			Scroll(g, conflicts[cur], Down)
 		case binding[key.ShowLinesUp]:
 			conflicts[cur].TopPeek++
-			Select(conflicts[cur], g, false)
+			Select(g, conflicts[cur], false)
 		case binding[key.ShowLinesDown]:
 			conflicts[cur].BottomPeek++
-			Select(conflicts[cur], g, false)
+			Select(g, conflicts[cur], false)
 		case binding[key.SelectLocal]:
-			Resolve(conflicts[cur], g, v, conflict.Local)
+			Resolve(g, v, conflicts[cur], conflict.Local)
 		case binding[key.SelectIncoming]:
-			Resolve(conflicts[cur], g, v, conflict.Incoming)
+			Resolve(g, v, conflicts[cur], conflict.Incoming)
 		case binding[key.NextConflict]:
-			MoveToItem(Down, g, v)
+			Move(g, v, Down)
 		case binding[key.PreviousConflict]:
-			MoveToItem(Up, g, v)
+			Move(g, v, Up)
 		case binding[key.ToggleViewOrientation]:
-			ViewOrientation = ^ViewOrientation
+			viewOrientation = ^viewOrientation
 			layout(g)
 		case binding[key.EditCode]:
 			return ErrOpenEditor
 		case binding[key.ShowHelp], "?":
-			Select(conflicts[cur], g, true)
+			Select(g, conflicts[cur], true)
 		case binding[key.QuitApplication]:
 			globalQuit(g)
 		default:

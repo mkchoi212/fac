@@ -8,27 +8,43 @@ import (
 	"github.com/mkchoi212/fac/conflict"
 )
 
+// Following constants define the string literal names of 5 views
+// that are instantiated via gocui
 const (
 	Current = "current"
 	Foreign = "foreign"
 	Panel   = "panel"
 	Prompt  = "prompt"
-	Input   = "input prompt"
-
-	Up   = 3
-	Down = 4
-
-	Horizontal = 5
-	Vertical   = -6
+	Input   = "input"
 )
 
-var (
-	ViewOrientation = Vertical
-	inputHeight     = 2
+// `Up` and `Down` represent scrolling directions
+// `Horizontal` and `Vertical` represent current code view orientation
+// Notice how both pairs of directionality are `not`s of each other
+const (
+	Up   = 1
+	Down = ^1
+
+	Horizontal = 2
+	Vertical   = ^2
 )
 
+// Following constants define input panel's dimensions
+const (
+	inputHeight    = 2
+	inputCursorPos = 17
+	promptWidth    = 21
+)
+
+func printLines(v *gocui.View, lines []string) {
+	for _, line := range lines {
+		fmt.Fprint(v, line)
+	}
+}
+
+// layout is used as fac's main gocui.Gui manager
 func layout(g *gocui.Gui) (err error) {
-	if err = makePanels(g); err != nil {
+	if err = makeCodePanels(g); err != nil {
 		return
 	}
 
@@ -43,7 +59,10 @@ func layout(g *gocui.Gui) (err error) {
 	return
 }
 
-func makePanels(g *gocui.Gui) error {
+// makeCodePanels draws the two panels representing "local" and "incoming" lines of code
+// `viewOrientation` is taken into consideration as the panels can either be
+//  `Vertical` or `Horizontal`
+func makeCodePanels(g *gocui.Gui) error {
 	maxX, maxY := g.Size()
 	viewHeight := maxY - inputHeight
 	branchViewWidth := (maxX / 5) * 2
@@ -52,7 +71,7 @@ func makePanels(g *gocui.Gui) error {
 	var x0, x1, y0, y1 int
 	var x2, x3, y2, y3 int
 
-	if ViewOrientation == Horizontal {
+	if viewOrientation == Horizontal {
 		x0, x1 = 0, branchViewWidth
 		y0, y1 = 0, viewHeight
 		x2, x3 = branchViewWidth, branchViewWidth*2
@@ -87,6 +106,8 @@ func makePanels(g *gocui.Gui) error {
 	return nil
 }
 
+// makeOverviewPanel draws the panel on the right-side of the CUI
+// listing all the conflicts that need to be resolved
 func makeOverviewPanel(g *gocui.Gui) error {
 	maxX, maxY := g.Size()
 	viewHeight := maxY - inputHeight
@@ -101,13 +122,15 @@ func makeOverviewPanel(g *gocui.Gui) error {
 	return nil
 }
 
+// makePrompt draws two panels on the bottom of the CUI
+// A "prompt view" which prompts the user for available keybindings and
+// a "user input view" which is an area where the user can type in queries
 func makePrompt(g *gocui.Gui) error {
 	maxX, maxY := g.Size()
-	inputHeight := 2
 	viewHeight := maxY - inputHeight
 
 	// Prompt view
-	if v, err := g.SetView(Prompt, 0, viewHeight, 21, viewHeight+inputHeight); err != nil {
+	if v, err := g.SetView(Prompt, 0, viewHeight, promptWidth, viewHeight+inputHeight); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
@@ -116,7 +139,7 @@ func makePrompt(g *gocui.Gui) error {
 	}
 
 	// User input view
-	if v, err := g.SetView(Input, 17, viewHeight, maxX, viewHeight+inputHeight); err != nil {
+	if v, err := g.SetView(Input, inputCursorPos, viewHeight, maxX, viewHeight+inputHeight); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
@@ -130,7 +153,9 @@ func makePrompt(g *gocui.Gui) error {
 	return nil
 }
 
-func Select(c *conflict.Conflict, g *gocui.Gui, showHelp bool) error {
+// Select selects conflict `c` as the current conflict displayed on the screen
+// When selecting a conflict, it updates the side panel, and the code view
+func Select(g *gocui.Gui, c *conflict.Conflict, showHelp bool) error {
 	// Update side panel
 	g.Update(func(g *gocui.Gui) error {
 		v, err := g.View(Panel)
@@ -155,7 +180,7 @@ func Select(c *conflict.Conflict, g *gocui.Gui, showHelp bool) error {
 		}
 
 		if showHelp {
-			printHelp(v, &binding)
+			PrintHelp(v, &binding)
 		}
 		return nil
 	})
@@ -197,20 +222,23 @@ func Select(c *conflict.Conflict, g *gocui.Gui, showHelp bool) error {
 	return nil
 }
 
-func Resolve(c *conflict.Conflict, g *gocui.Gui, v *gocui.View, version int) error {
+// Resolve resolves the provided conflict and moves to the next conflict
+// in the queue
+func Resolve(g *gocui.Gui, v *gocui.View, c *conflict.Conflict, version int) error {
 	g.Update(func(g *gocui.Gui) error {
 		c.Choice = version
-		MoveToItem(Down, g, v)
+		Move(g, v, Down)
 		return nil
 	})
 	return nil
 }
 
-func MoveToItem(dir int, g *gocui.Gui, v *gocui.View) error {
+// Move goes to the next conflict in the list in the provided `direction`
+func Move(g *gocui.Gui, v *gocui.View, direction int) error {
 	originalCur := cur
 
 	for {
-		if dir == Up {
+		if direction == Up {
 			cur--
 		} else {
 			cur++
@@ -227,14 +255,16 @@ func MoveToItem(dir int, g *gocui.Gui, v *gocui.View) error {
 		}
 	}
 
+	// Quit application if all items are resolved
 	if originalCur == cur && conflicts[cur].Choice != 0 {
 		globalQuit(g)
 	}
 
-	Select(conflicts[cur], g, false)
+	Select(g, conflicts[cur], false)
 	return nil
 }
 
+// Scroll scrolls the two code view panels in `direction` by one line
 func Scroll(g *gocui.Gui, c *conflict.Conflict, direction int) {
 	if direction == Up {
 		c.TopPeek--
@@ -244,5 +274,5 @@ func Scroll(g *gocui.Gui, c *conflict.Conflict, direction int) {
 		return
 	}
 
-	Select(c, g, false)
+	Select(g, c, false)
 }

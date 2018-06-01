@@ -10,11 +10,14 @@ import (
 	"github.com/mkchoi212/fac/key"
 )
 
-func printHelp(v io.Writer, binding *key.Binding) {
+// PrintHelp prints the current key binding rules in the side panel
+func PrintHelp(v io.Writer, binding *key.Binding) {
 	fmt.Fprintf(v, color.Blue(color.Regular, binding.Help()))
 }
 
-func printSummary(conflicts []*conflict.Conflict) {
+// PrintSummary prints the summary of the fac session after the user
+// either quits the program or has resolved all conflicts
+func PrintSummary(conflicts []*conflict.Conflict) {
 	resolvedCnt := 0
 	var line string
 

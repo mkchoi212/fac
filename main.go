@@ -13,28 +13,28 @@ import (
 )
 
 var (
-	conflicts        = []*conflict.Conflict{}
-	cur              = 0
-	consecutiveError = 0
-	binding          = key.Binding{}
+	viewOrientation   = Vertical
+	conflicts         = []*conflict.Conflict{}
+	binding           = key.Binding{}
+	cur               = 0
+	consecutiveErrCnt = 0
 )
 
-func printLines(v *gocui.View, lines []string) {
-	for _, line := range lines {
-		fmt.Fprint(v, line)
-	}
-}
-
+// globalQuit is invoked when the user quits the contact and or
+// when all conflicts have been resolved
 func globalQuit(g *gocui.Gui) {
 	g.Update(func(g *gocui.Gui) error {
 		return gocui.ErrQuit
 	})
 }
 
+// quit is invoked when the user presses "Ctrl+C"
 func quit(g *gocui.Gui, v *gocui.View) error {
 	return gocui.ErrQuit
 }
 
+// parseInput is invoked when the user presses "Enter"
+// It `evaluate`s the user's query and reflects the state on the UI
 func parseInput(g *gocui.Gui, v *gocui.View) error {
 	in := strings.TrimSuffix(v.Buffer(), "\n")
 	v.Clear()
@@ -42,48 +42,24 @@ func parseInput(g *gocui.Gui, v *gocui.View) error {
 
 	if err := Evaluate(g, v, conflicts[cur], in); err != nil {
 		if err == ErrUnknownCmd {
-			consecutiveError++
-			if consecutiveError > 3 {
-				Select(conflicts[cur], g, true)
+			consecutiveErrCnt++
+			if consecutiveErrCnt > 3 {
+				Select(g, conflicts[cur], true)
 			}
 		} else {
 			return err
 		}
 	} else {
-		consecutiveError = 0
+		consecutiveErrCnt = 0
 	}
 
 	PrintPrompt(g)
 	return nil
 }
 
-// Start initializes, configures, and starts a fresh instance of gocui
-func Start() (err error) {
-	g, err := gocui.NewGui(gocui.OutputNormal)
-	if err != nil {
-		return
-	}
-
-	defer g.Close()
-	g.SetManagerFunc(layout)
-	g.Cursor = true
-
-	if err = g.SetKeybinding("", gocui.KeyCtrlC, gocui.ModNone, quit); err != nil {
-		return
-	}
-	if err = g.SetKeybinding("", gocui.KeyEnter, gocui.ModNone, parseInput); err != nil {
-		return
-	}
-
-	Select(conflicts[cur], g, false)
-
-	if err = g.MainLoop(); err != nil {
-		return
-	}
-
-	return
-}
-
+// findConflicts looks at the current directory and returns an
+// array of `File`s that contain merge conflicts
+// It returns an error if it fails to parse the conflicts
 func findConflicts() (files []conflict.File, err error) {
 	cwd, err := os.Getwd()
 	if err != nil {
@@ -104,16 +80,46 @@ func findConflicts() (files []conflict.File, err error) {
 	return
 }
 
-func runUI() error {
+// runUI initializes, configures, and starts a fresh instance of gocui
+func runUI() (err error) {
+	g, err := gocui.NewGui(gocui.OutputNormal)
+	if err != nil {
+		return
+	}
+
+	defer g.Close()
+	g.SetManagerFunc(layout)
+	g.Cursor = true
+
+	if err = g.SetKeybinding("", gocui.KeyCtrlC, gocui.ModNone, quit); err != nil {
+		return
+	}
+	if err = g.SetKeybinding("", gocui.KeyEnter, gocui.ModNone, parseInput); err != nil {
+		return
+	}
+
+	Select(g, conflicts[cur], false)
+
+	if err = g.MainLoop(); err != nil {
+		return
+	}
+
+	return
+}
+
+// mainLoop manages how the main instances of gocui are created and destroyed
+func mainLoop() error {
 	for {
-		if err := Start(); err != nil {
+		if err := runUI(); err != nil {
+			// Instantiates a fresh instance of gocui
+			// when user opens an editor because screen is dirty
 			if err == ErrOpenEditor {
 				newLines, err := editor.Open(conflicts[cur])
 				if err != nil {
 					return err
 				}
 				if err = conflicts[cur].Update(newLines); err != nil {
-					consecutiveError++
+					consecutiveErrCnt++
 				}
 			} else if err == gocui.ErrQuit {
 				break
@@ -137,7 +143,6 @@ func main() {
 		die(err)
 	}
 
-	// Find and parse conflicts
 	files, err := findConflicts()
 	if err != nil {
 		die(err)
@@ -148,7 +153,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	if err = runUI(); err != nil {
+	if err = mainLoop(); err != nil {
 		die(err)
 	}
 
@@ -158,5 +163,5 @@ func main() {
 		}
 	}
 
-	printSummary(conflicts)
+	PrintSummary(conflicts)
 }
