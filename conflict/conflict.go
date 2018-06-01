@@ -36,11 +36,14 @@ type Conflict struct {
 	BottomPeek int
 }
 
+// Represents user's conflict resolution decision
 const (
 	Local    = 1
 	Incoming = 2
 )
 
+// ErrInvalidManualInput is thrown when the manual code editing session
+// results in deletion of the conflict markers in the text
 var ErrInvalidManualInput = errors.New("Newly edited code is invalid")
 
 // Valid checks if the parsed conflict has corresponding begin, separator,

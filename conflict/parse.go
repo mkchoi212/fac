@@ -75,7 +75,11 @@ func GroupConflictMarkers(lines []string) (conflicts []Conflict, err error) {
 	return conflicts, nil
 }
 
-func ExtractConflictsIn(f File) (conflicts []Conflict, err error) {
+// ExtractConflicts extracts all conflicts from the provided `File`
+// It returns an error if it fails to parse the conflict markers
+// and if syntax highlighting fatally fails
+// TODO: Prevent crashes from syntax highlighting
+func ExtractConflicts(f File) (conflicts []Conflict, err error) {
 	conflicts, err = GroupConflictMarkers(f.Lines)
 	if err != nil {
 		return
@@ -119,7 +123,7 @@ func Find(cwd string) (files []File, err error) {
 			return
 		}
 
-		conflicts, err := ExtractConflictsIn(file)
+		conflicts, err := ExtractConflicts(file)
 		if err != nil {
 			return nil, err
 		}

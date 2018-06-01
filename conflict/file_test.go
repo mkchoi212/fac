@@ -30,7 +30,7 @@ func TestWriteChanges(t *testing.T) {
 		}
 
 		// Exract conflicts and resolve them
-		conflicts, err := ExtractConflictsIn(f)
+		conflicts, err := ExtractConflicts(f)
 		testhelper.Ok(t, err)
 		for i := range test.resolveDecision {
 			conflicts[i].Choice = test.resolveDecision[i]

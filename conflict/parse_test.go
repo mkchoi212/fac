@@ -44,7 +44,7 @@ func TestParseConflictsIn(t *testing.T) {
 			t.Error("ParseConflicts/Read failed")
 		}
 
-		_, err := ExtractConflictsIn(f)
+		_, err := ExtractConflicts(f)
 		if test.shouldPass {
 			testhelper.Assert(t, err == nil, "function should have succeeded")
 		} else {

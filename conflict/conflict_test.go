@@ -137,7 +137,7 @@ func TestHighlight(t *testing.T) {
 		err := f.Read()
 		testhelper.Ok(t, err)
 
-		conflicts, err := ExtractConflictsIn(f)
+		conflicts, err := ExtractConflicts(f)
 		if test.shouldPass {
 			testhelper.Ok(t, err)
 		} else {
