@@ -35,6 +35,7 @@ const (
 	PreviousConflict      = "previous"
 	QuitApplication       = "quit"
 	ShowHelp              = "help"
+	ContinuousEvaluation  = "cont_eval"
 )
 
 // defaultBinding is used when the user has not specified any of the
@@ -52,6 +53,7 @@ var defaultBinding = Binding{
 	PreviousConflict:      "p",
 	QuitApplication:       "q",
 	ShowHelp:              "h",
+	ContinuousEvaluation:  "false",
 }
 
 // LoadSettings looks for a user specified key-binding settings file - `$HOME/.fac.yml`
@@ -118,7 +120,7 @@ func (b Binding) consolidate() {
 
 		if !ok || userValue == "" {
 			b[key] = defaultValue
-		} else if len(userValue) > 1 {
+		} else if len(userValue) > 1 && userValue != "false" && userValue != "true" {
 			b[key] = string(userValue[0])
 		}
 	}
@@ -126,14 +128,12 @@ func (b Binding) consolidate() {
 
 // verify looks through the user's key-binding settings and looks for any infractions such as..
 // 1. Invalid/ignored key-binding keys
-// 2. Multi-character key-mappings
+// 2. Multi-character key-mappings (except for `cont_eval`)
 // 3. Duplicate key-mappings
 func (b Binding) verify() (warnings []string, fatals []string) {
 	bindTable := map[string][]string{}
 
 	for k, v := range b {
-		bindTable[string(v[0])] = append(bindTable[string(v[0])], k)
-
 		// Check for "1. Invalid/ignored key-binding keys"
 		if _, ok := defaultBinding[k]; !ok {
 			warnings = append(warnings, fmt.Sprintf("Invalid key: \"%s\" will be ignored", k))
@@ -142,9 +142,15 @@ func (b Binding) verify() (warnings []string, fatals []string) {
 		}
 
 		// Check for "2. Multi-character key-mappings"
-		if len(v) > 1 {
-			warnings = append(warnings, fmt.Sprintf("Illegal multi-character mapping: \"%s\" will be interpreted as '%s'", v, string(v[0])))
+		if k == ContinuousEvaluation && v != "false" && v != "true" {
+			fatals = append(fatals, fmt.Sprintf("Invalid value: value for key '%s' must either be true or false", ContinuousEvaluation))
 			continue
+		} else if len(v) > 1 && k != ContinuousEvaluation {
+			abbreviated := string(v[0])
+			warnings = append(warnings, fmt.Sprintf("Illegal multi-character mapping: \"%s\" will be interpreted as '%s'", v, abbreviated))
+			bindTable[abbreviated] = append(bindTable[abbreviated], k)
+		} else {
+			bindTable[v] = append(bindTable[v], k)
 		}
 	}
 

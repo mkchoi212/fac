@@ -36,14 +36,24 @@ var tests = []struct {
 			SelectLocal:    "i",
 			SelectIncoming: "incoming",
 		},
-		expected: Binding{
-			SelectLocal:    "l",
-			SelectIncoming: "i",
-		},
+		expected: nil,
 		warnings: []string{
 			"Illegal multi-character mapping: \"incoming\" will be interpreted as 'i'",
 		},
 		fatals: []string{
+			"Duplicate key-mapping: \"select_incoming, select_local\" are all represented by 'i'",
+		},
+	},
+	{
+		settings: Binding{
+			ContinuousEvaluation: "kinda",
+			SelectIncoming:       "i",
+			SelectLocal:          "i",
+		},
+		expected: nil,
+		warnings: nil,
+		fatals: []string{
+			"Invalid value: value for key 'cont_eval' must either be true or false",
 			"Duplicate key-mapping: \"select_incoming, select_local\" are all represented by 'i'",
 		},
 	},
