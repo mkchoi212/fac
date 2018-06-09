@@ -5,9 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/mkchoi212/fac/key"
-
 	"github.com/jroimartin/gocui"
+	"github.com/mkchoi212/fac/binding"
 	"github.com/mkchoi212/fac/color"
 	"github.com/mkchoi212/fac/conflict"
 )
@@ -23,7 +22,7 @@ var ErrOpenEditor = errors.New("Screen is tainted after opening vim")
 // Note that the prompt is composed of two separate views,
 // one that displays just the promptString, and another that takes input from the user
 func PrintPrompt(g *gocui.Gui) {
-	promptString := binding.Summary()
+	promptString := keyBinding.Summary()
 
 	g.Update(func(g *gocui.Gui) error {
 		v, err := g.View(Prompt)
@@ -48,33 +47,33 @@ func PrintPrompt(g *gocui.Gui) {
 func Evaluate(g *gocui.Gui, v *gocui.View, conf *conflict.Conflict, input string) (err error) {
 	for _, c := range input {
 		switch string(c) {
-		case binding[key.ScrollUp]:
+		case keyBinding[binding.ScrollUp]:
 			Scroll(g, conflicts[cur], Up)
-		case binding[key.ScrollDown]:
+		case keyBinding[binding.ScrollDown]:
 			Scroll(g, conflicts[cur], Down)
-		case binding[key.ShowLinesUp]:
+		case keyBinding[binding.ShowLinesUp]:
 			conflicts[cur].TopPeek++
 			Select(g, conflicts[cur], false)
-		case binding[key.ShowLinesDown]:
+		case keyBinding[binding.ShowLinesDown]:
 			conflicts[cur].BottomPeek++
 			Select(g, conflicts[cur], false)
-		case binding[key.SelectLocal]:
+		case keyBinding[binding.SelectLocal]:
 			Resolve(g, v, conflicts[cur], conflict.Local)
-		case binding[key.SelectIncoming]:
+		case keyBinding[binding.SelectIncoming]:
 			Resolve(g, v, conflicts[cur], conflict.Incoming)
-		case binding[key.NextConflict]:
+		case keyBinding[binding.NextConflict]:
 			Move(g, v, Down)
-		case binding[key.PreviousConflict]:
+		case keyBinding[binding.PreviousConflict]:
 			Move(g, v, Up)
-		case binding[key.ToggleViewOrientation]:
+		case keyBinding[binding.ToggleViewOrientation]:
 			viewOrientation = ^viewOrientation
 			layout(g)
-		case binding[key.EditCode]:
-			return ErrOpenEditor
-		case binding[key.ShowHelp], "?":
+		case keyBinding[binding.EditCode]:
+			globalQuit(g, ErrOpenEditor)
+		case keyBinding[binding.ShowHelp], "?":
 			Select(g, conflicts[cur], true)
-		case binding[key.QuitApplication]:
-			globalQuit(g)
+		case keyBinding[binding.QuitApplication]:
+			globalQuit(g, gocui.ErrQuit)
 		default:
 			return ErrUnknownCmd
 		}
@@ -106,9 +105,9 @@ func ParseInput(g *gocui.Gui, v *gocui.View) error {
 
 // PromptEditor handles user's interaction with the prompt
 // Note that user's `ContinuousEvaluation` setting value changes its behavior
-func PromptEditor(v *gocui.View, k gocui.Key, ch rune, mod gocui.Modifier) {
+func PromptEditor(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifier) {
 	if ch != 0 && mod == 0 {
-		if key.ContinuousEvaluation == "true" {
+		if keyBinding[binding.ContinuousEvaluation] == "true" {
 			v.Clear()
 			v.EditWrite(ch)
 			ParseInput(g, v)
@@ -119,7 +118,7 @@ func PromptEditor(v *gocui.View, k gocui.Key, ch rune, mod gocui.Modifier) {
 		return
 	}
 
-	switch k {
+	switch key {
 	case gocui.KeyEnter:
 		ParseInput(g, v)
 		v.Clear()

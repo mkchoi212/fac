@@ -6,16 +6,16 @@ import (
 	"strings"
 
 	"github.com/jroimartin/gocui"
+	"github.com/mkchoi212/fac/binding"
 	"github.com/mkchoi212/fac/color"
 	"github.com/mkchoi212/fac/conflict"
 	"github.com/mkchoi212/fac/editor"
-	"github.com/mkchoi212/fac/key"
 )
 
 var (
 	viewOrientation   = Vertical
 	conflicts         = []*conflict.Conflict{}
-	binding           = key.Binding{}
+	keyBinding        = binding.Binding{}
 	cur               = 0
 	consecutiveErrCnt = 0
 	g                 *gocui.Gui
@@ -112,7 +112,7 @@ func die(err error) {
 func main() {
 	var err error
 
-	binding, err = key.LoadSettings()
+	keyBinding, err = binding.LoadSettings()
 	if err != nil {
 		die(err)
 	}

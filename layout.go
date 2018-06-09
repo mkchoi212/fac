@@ -181,7 +181,7 @@ func Select(g *gocui.Gui, c *conflict.Conflict, showHelp bool) error {
 		}
 
 		if showHelp {
-			PrintHelp(v, &binding)
+			PrintHelp(v, &keyBinding)
 		}
 		return nil
 	})

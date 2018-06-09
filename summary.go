@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/mkchoi212/fac/binding"
 	"github.com/mkchoi212/fac/color"
 	"github.com/mkchoi212/fac/conflict"
-	"github.com/mkchoi212/fac/key"
 )
 
 // PrintHelp prints the current key binding rules in the side panel
-func PrintHelp(v io.Writer, binding *key.Binding) {
+func PrintHelp(v io.Writer, binding *binding.Binding) {
 	fmt.Fprintf(v, color.Blue(color.Regular, binding.Help()))
 }
 
