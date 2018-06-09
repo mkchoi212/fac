@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/mkchoi212/fac/key"
 
@@ -79,4 +80,65 @@ func Evaluate(g *gocui.Gui, v *gocui.View, conf *conflict.Conflict, input string
 		}
 	}
 	return
+}
+
+// ParseInput is invoked when the user presses "Enter"
+// It `evaluate`s the user's query and reflects the state on the UI
+func ParseInput(g *gocui.Gui, v *gocui.View) error {
+	in := strings.TrimSuffix(v.Buffer(), "\n")
+
+	if err := Evaluate(g, v, conflicts[cur], in); err != nil {
+		if err == ErrUnknownCmd {
+			consecutiveErrCnt++
+			if consecutiveErrCnt > 3 {
+				Select(g, conflicts[cur], true)
+			}
+		} else {
+			return err
+		}
+	} else {
+		consecutiveErrCnt = 0
+	}
+
+	PrintPrompt(g)
+	return nil
+}
+
+// PromptEditor handles user's interaction with the prompt
+// Note that user's `ContinuousEvaluation` setting value changes its behavior
+func PromptEditor(v *gocui.View, k gocui.Key, ch rune, mod gocui.Modifier) {
+	if ch != 0 && mod == 0 {
+		if key.ContinuousEvaluation == "true" {
+			v.Clear()
+			v.EditWrite(ch)
+			ParseInput(g, v)
+			v.SetCursor(0, 0)
+		} else {
+			v.EditWrite(ch)
+		}
+		return
+	}
+
+	switch k {
+	case gocui.KeyEnter:
+		ParseInput(g, v)
+		v.Clear()
+		v.SetCursor(0, 0)
+	case gocui.KeySpace:
+		v.EditWrite(' ')
+	case gocui.KeyBackspace, gocui.KeyBackspace2:
+		v.EditDelete(true)
+	case gocui.KeyDelete:
+		v.EditDelete(false)
+	case gocui.KeyInsert:
+		v.Overwrite = !v.Overwrite
+	case gocui.KeyArrowDown:
+		v.MoveCursor(0, 1, false)
+	case gocui.KeyArrowUp:
+		v.MoveCursor(0, -1, false)
+	case gocui.KeyArrowLeft:
+		v.MoveCursor(-1, 0, false)
+	case gocui.KeyArrowRight:
+		v.MoveCursor(1, 0, false)
+	}
 }

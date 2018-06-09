@@ -146,6 +146,7 @@ func makePrompt(g *gocui.Gui) error {
 		v.Frame = false
 		v.Editable = true
 		v.Wrap = false
+		v.Editor = gocui.EditorFunc(PromptEditor)
 		if _, err := g.SetCurrentView(Input); err != nil {
 			return err
 		}
