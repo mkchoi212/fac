@@ -133,7 +133,7 @@ func PromptEditor(v *gocui.View, k gocui.Key, ch rune, mod gocui.Modifier) {
 	case gocui.KeyInsert:
 		v.Overwrite = !v.Overwrite
 	case gocui.KeyArrowDown:
-		v.MoveCursor(0, 1, false)
+		v.SetCursor(len(v.Buffer())-1, 0)
 	case gocui.KeyArrowUp:
 		v.MoveCursor(0, -1, false)
 	case gocui.KeyArrowLeft:
