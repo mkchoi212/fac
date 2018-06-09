@@ -258,7 +258,7 @@ func Move(g *gocui.Gui, v *gocui.View, direction int) error {
 
 	// Quit application if all items are resolved
 	if originalCur == cur && conflicts[cur].Choice != 0 {
-		globalQuit(g)
+		globalQuit(g, gocui.ErrQuit)
 	}
 
 	Select(g, conflicts[cur], false)

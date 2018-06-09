@@ -23,9 +23,9 @@ var (
 
 // globalQuit is invoked when the user quits the contact and or
 // when all conflicts have been resolved
-func globalQuit(g *gocui.Gui) {
+func globalQuit(g *gocui.Gui, err error) {
 	g.Update(func(g *gocui.Gui) error {
-		return gocui.ErrQuit
+		return err
 	})
 }
 
