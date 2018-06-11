@@ -65,8 +65,8 @@ q | Ctrl+c - [q]uit
 
 ### ⚙️ Customization
 
-The above key-bindings can be altered by creating a `.fac.yml` file in your home directory.
-Please refer to the [configuration README.md](./key/README.md) for more information.
+The above key-bindings and various behaviors can be altered by creating a `.fac.yml` file in your home directory.
+Please refer to the [configuration README.md](./binding/README.md) for more information.
 
 ## ✋ Contributing
 
