@@ -103,14 +103,14 @@ func TestParseSettings(t *testing.T) {
 	currentUser = func() (*user.User, error) {
 		return nil, errors.New("Could not find current user")
 	}
-	binding := parseSettings()
+	binding, _ := parseSettings()
 	testhelper.Equals(t, defaultBinding, binding)
 
 	// Test with invalid directory
 	currentUser = func() (*user.User, error) {
 		return &user.User{HomeDir: "foobar"}, nil
 	}
-	binding = parseSettings()
+	binding, _ = parseSettings()
 	testhelper.Equals(t, defaultBinding, binding)
 
 	// Test with valid directory with empty file
@@ -121,12 +121,12 @@ func TestParseSettings(t *testing.T) {
 	testhelper.Ok(t, err)
 	defer f.Close()
 
-	binding = parseSettings()
+	binding, _ = parseSettings()
 	testhelper.Equals(t, 0, len(binding))
 
 	// Test valid directory with erroneous content
 	f.WriteString("erroneous content")
-	binding = parseSettings()
+	binding, _ = parseSettings()
 	testhelper.Equals(t, defaultBinding, binding)
 }
 
