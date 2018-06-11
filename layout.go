@@ -156,7 +156,7 @@ func makePrompt(g *gocui.Gui) error {
 
 // Select selects conflict `c` as the current conflict displayed on the screen
 // When selecting a conflict, it updates the side panel, and the code view
-func Select(g *gocui.Gui, c *conflict.Conflict, showHelp bool) error {
+func Select(g *gocui.Gui, c *conflict.Conflict, showHelp bool) {
 	// Update side panel
 	g.Update(func(g *gocui.Gui) error {
 		v, err := g.View(Panel)
@@ -220,22 +220,20 @@ func Select(g *gocui.Gui, c *conflict.Conflict, showHelp bool) error {
 
 		return nil
 	})
-	return nil
 }
 
 // Resolve resolves the provided conflict and moves to the next conflict
 // in the queue
-func Resolve(g *gocui.Gui, v *gocui.View, c *conflict.Conflict, version int) error {
+func Resolve(g *gocui.Gui, v *gocui.View, c *conflict.Conflict, version int) {
 	g.Update(func(g *gocui.Gui) error {
 		c.Choice = version
 		Move(g, v, Down)
 		return nil
 	})
-	return nil
 }
 
 // Move goes to the next conflict in the list in the provided `direction`
-func Move(g *gocui.Gui, v *gocui.View, direction int) error {
+func Move(g *gocui.Gui, v *gocui.View, direction int) {
 	originalCur := cur
 
 	for {
@@ -262,7 +260,6 @@ func Move(g *gocui.Gui, v *gocui.View, direction int) error {
 	}
 
 	Select(g, conflicts[cur], false)
-	return nil
 }
 
 // Scroll scrolls the two code view panels in `direction` by one line

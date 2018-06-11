@@ -85,6 +85,10 @@ func Evaluate(g *gocui.Gui, v *gocui.View, conf *conflict.Conflict, input string
 // It `evaluate`s the user's query and reflects the state on the UI
 func ParseInput(g *gocui.Gui, v *gocui.View) error {
 	in := strings.TrimSuffix(v.Buffer(), "\n")
+	if keyBinding[binding.ContinuousEvaluation] == "false" {
+		v.Clear()
+		_ = v.SetCursor(0, 0)
+	}
 
 	if err := Evaluate(g, v, conflicts[cur], in); err != nil {
 		if err == ErrUnknownCmd {
@@ -110,8 +114,8 @@ func PromptEditor(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifier) {
 		if keyBinding[binding.ContinuousEvaluation] == "true" {
 			v.Clear()
 			v.EditWrite(ch)
-			ParseInput(g, v)
-			v.SetCursor(0, 0)
+			_ = ParseInput(g, v)
+			_ = v.SetCursor(0, 0)
 		} else {
 			v.EditWrite(ch)
 		}
@@ -119,10 +123,6 @@ func PromptEditor(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifier) {
 	}
 
 	switch key {
-	case gocui.KeyEnter:
-		ParseInput(g, v)
-		v.Clear()
-		v.SetCursor(0, 0)
 	case gocui.KeySpace:
 		v.EditWrite(' ')
 	case gocui.KeyBackspace, gocui.KeyBackspace2:
@@ -132,7 +132,7 @@ func PromptEditor(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifier) {
 	case gocui.KeyInsert:
 		v.Overwrite = !v.Overwrite
 	case gocui.KeyArrowDown:
-		v.SetCursor(len(v.Buffer())-1, 0)
+		_ = v.SetCursor(len(v.Buffer())-1, 0)
 	case gocui.KeyArrowUp:
 		v.MoveCursor(0, -1, false)
 	case gocui.KeyArrowLeft:
