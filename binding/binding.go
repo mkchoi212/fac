@@ -60,12 +60,27 @@ var defaultBinding = Binding{
 // and returns a map representation of the file
 // It also looks for errors, and ambiguities within the file and notifies the user of them
 func LoadSettings() (b Binding, err error) {
-	b = parseSettings()
-	warnings, fatals := b.verify()
+	warnings := []string{}
+
+	b, ok := parseSettings()
+	if ok != nil {
+		warnings = append(warnings, ok.Error())
+	}
+
+	verificationWarnings, fatals := b.verify()
+	warnings = append(warnings, verificationWarnings...)
+
+	if len(warnings) != 0 {
+		fmt.Println(color.Yellow(color.Regular, "⚠️  %d infraction(s) detected in .fac.yml", len(warnings)))
+		for _, msg := range warnings {
+			fmt.Println(color.Yellow(color.Regular, "%s", msg))
+		}
+		fmt.Println()
+	}
 
 	if len(fatals) != 0 {
 		var errorMsg bytes.Buffer
-		errorMsg.WriteString(color.Red(color.Regular, "🚫  %d unrecoverable error(s) detected in .fac.yml\n", len(fatals)))
+		errorMsg.WriteString(color.Red(color.Regular, "🚫  %d unrecoverable error(s) detected in .fac.yml", len(fatals)))
 		for _, msg := range fatals {
 			errorMsg.WriteString(color.Red(color.Regular, "\n%s", msg))
 		}
@@ -73,11 +88,6 @@ func LoadSettings() (b Binding, err error) {
 	}
 
 	if len(warnings) != 0 {
-		fmt.Println(color.Yellow(color.Regular, "⚠️  %d infraction(s) detected in .fac.yml\n", len(warnings)))
-		for _, msg := range warnings {
-			fmt.Println(color.Yellow(color.Regular, "%s", msg))
-		}
-		fmt.Println()
 		time.Sleep(time.Duration(2) * time.Second)
 	}
 
@@ -87,29 +97,26 @@ func LoadSettings() (b Binding, err error) {
 
 // parseSettings looks for `$HOME/.fac.yml` and parses it into a `Binding` value
 // If the file does not exist, it returns the `defaultBinding`
-func parseSettings() Binding {
-	b := make(Binding)
+func parseSettings() (Binding, error) {
+	userBinding := make(Binding)
 
 	usr, err := currentUser()
 	if err != nil {
-		fmt.Println(color.Yellow(color.Regular, "fac: %s. Default key-bindings will be used", err.Error()))
-		return defaultBinding
+		return defaultBinding, err
 	}
 
 	// Read config file
 	f, err := ioutil.ReadFile(usr.HomeDir + "/.fac.yml")
 	if err != nil {
-		fmt.Println(color.Yellow(color.Regular, "fac: %s. Default key-bindings will be used", err.Error()))
-		return defaultBinding
+		return defaultBinding, err
 	}
 
 	// Parse config file
-	if err = yaml.Unmarshal(f, &b); err != nil {
-		fmt.Println(color.Yellow(color.Regular, "fac: %s. Default key-bindings will be used", err.Error()))
-		return defaultBinding
+	if err = yaml.Unmarshal(f, &userBinding); err != nil {
+		return defaultBinding, err
 	}
 
-	return b
+	return userBinding, nil
 }
 
 // consolidate takes the user's key-binding settings and fills the missings key-binds
