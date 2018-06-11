@@ -72,6 +72,12 @@ func runUI() (err error) {
 		return
 	}
 
+	if keyBinding[binding.ContinuousEvaluation] == "false" {
+		if err = g.SetKeybinding("", gocui.KeyEnter, gocui.ModNone, ParseInput); err != nil {
+			return
+		}
+	}
+
 	Select(g, conflicts[cur], false)
 
 	if err = g.MainLoop(); err != nil {
