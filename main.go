@@ -116,6 +116,8 @@ func die(err error) {
 }
 
 func main() {
+	ParseFlags()
+
 	var err error
 
 	keyBinding, err = binding.LoadSettings()
