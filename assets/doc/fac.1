@@ -7,7 +7,14 @@
 fac \- tool for resolving git merge conflicts
 .SH SYNOPSIS
 .PP
-fac
+\f[B]fac \-h | \-help\f[]
+.PD 0
+.P
+.PD
+\f[B]fac \-version\f[]
+.PD 0
+.P
+.PD
 .SH DESCRIPTION
 .PP
 Fix All Conflicts (fac) aims to make resolving git(1) merge conflicts
@@ -17,8 +24,8 @@ conflicts interactively.
 .PP
 The UI is split into three panes.
 Two show the versions of content in conflict.
-The third, a sidebar show actions that can be taken to resolve the
-conflict.
+The third is a sidebar that show the queue and actions that can be taken
+to resolve the conflict.
 .SH USAGE
 .PP
 fac operates much like \f[C]git\ add\ \-p\f[].
@@ -26,52 +33,177 @@ It has a prompt for input at the bottom of the screen where the various
 commands are entered.
 .PP
 The commands have been preset to the following specifications:
-.PP
-\f[B]w\f[] \- show more lines up
-.PD 0
-.P
-.PD
-\f[B]s\f[] \- show more lines down
-.PD 0
-.P
-.PD
-\f[B]a\f[] \- use local version
-.PD 0
-.P
-.PD
-\f[B]d\f[] \- use incoming version \f[B]e\f[] \- manually edit code
-.PP
-\f[B]j\f[] \- scroll down
-.PD 0
-.P
-.PD
-\f[B]k\f[] \- scroll up
-.PP
-\f[B]v\f[] \- [v]iew orientation
-.PD 0
-.P
-.PD
-\f[B]n\f[] \- [n]ext conflict
-.PD 0
-.P
-.PD
-\f[B]p\f[] \- [p]revious conflict
-.PP
-\f[B]h\f[] | \f[B]?\f[] \- [h]elp
-.PD 0
-.P
-.PD
-\f[B]q\f[] | \f[B]Ctrl+c\f[] \- [q]uit
+.TP
+.B \f[B]w\f[]
+show more lines up
+.RS
+.RE
+.TP
+.B \f[B]s\f[]
+show more lines down
+.RS
+.RE
+.TP
+.B \f[B]a\f[]
+use local version
+.RS
+.RE
+.TP
+.B \f[B]d\f[]
+use incoming version
+.RS
+.RE
+.TP
+.B \f[B]e\f[]
+manually edit code
+.RS
+.RE
+.TP
+.B \f[B]j\f[]
+scroll down
+.RS
+.RE
+.TP
+.B \f[B]k\f[]
+scroll up
+.RS
+.RE
+.TP
+.B \f[B]v\f[]
+[v]iew orientation
+.RS
+.RE
+.TP
+.B \f[B]n\f[]
+[n]ext conflict
+.RS
+.RE
+.TP
+.B \f[B]p\f[]
+[p]revious conflict
+.RS
+.RE
+.TP
+.B \f[B]h | ?\f[]
+[h]elp
+.RS
+.RE
+.TP
+.B \f[B]q | Ctrl+c\f[]
+[q]uit
+.RS
+.RE
 .PP
 The movement controls have been derived from both the world of gamers
 (WASD) and vi(1) users (HJKL).
-.SH BUGS
+To customize these key bindings, please refer to the next section.
+.SH CUSTOMIZATION
 .PP
-fac does not currently support diff3 merge conflict output.
-.SH NOTES
-.IP "1." 3
-Home page and source code
+Program behavior can be customized by creating a \f[C]$HOME/.fac.yml\f[]
+with the below variables.
+.SS BEHAVIOR
+.TP
+.B \f[B]cont_eval\f[]
+evaluate commands without pressing ENTER
+.RS
+.RE
+.SS KEY BINDINGS
+.TP
+.B \f[B]select_local\f[]
+select local version
+.RS
+.RE
+.TP
+.B \f[B]select_incoming\f[]
+select incoming version
+.RS
+.RE
+.TP
+.B \f[B]toggle_view\f[]
+toggle to horizontal | vertical view
+.RS
+.RE
+.TP
+.B \f[B]show_up\f[]
+show more lines above
+.RS
+.RE
+.TP
+.B \f[B]show_down\f[]
+show more lines below
+.RS
+.RE
+.TP
+.B \f[B]scroll_up\f[]
+scroll up
+.RS
+.RE
+.TP
+.B \f[B]scroll_down\f[]
+scroll down
+.RS
+.RE
+.TP
+.B \f[B]edit\f[]
+manually edit code chunk
+.RS
+.RE
+.TP
+.B \f[B]next\f[]
+go to next conflict
+.RS
+.RE
+.TP
+.B \f[B]previous\f[]
+go to previous conflict
+.RS
+.RE
+.TP
+.B \f[B]quit\f[]
+quit application
+.RS
+.RE
+.TP
+.B \f[B]help\f[]
+display help in side bar
+.RS
+.RE
+.SH COPYRIGHT
+.PP
+Copyright (c) 2018 Mike JS.
+Choi
+.PP
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the
+\[lq]Software\[rq]), to deal in the Software without restriction,
+including without limitation the rights to use, copy, modify, merge,
+publish, distribute, sublicense, and/or sell copies of the Software, and
+to permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+.PP
+The above copyright notice and this permission notice shall be included
+in all copies or substantial portions of the Software.
+.PP
+THE SOFTWARE IS PROVIDED \[lq]AS IS\[rq], WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+.SH AUTHOR
+.PP
+Mike JS.
+Choi <mkchoi212@icloud.com>
 .PD 0
 .P
 .PD
-https://github.com/mkchoi212/fac
+shogo\-ma <choroma194@gmail.com>
+.PP
+Please send bug reports or comments to
+<https://github.com/mkchoi212/fac/issues>.
+.PD 0
+.P
+.PD
+For more information, see the homepage at
+<https://github.com/mkchoi212/fac>.
