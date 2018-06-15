@@ -6,11 +6,10 @@ import (
 	"os"
 )
 
-// ParseFlags parses flags provided by the user
-func ParseFlags() {
-	// Setup custom help message
-	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, `Usage:
+const (
+	version = "2.0"
+	help    = `
+Usage:
 
    fac
 
@@ -36,8 +35,21 @@ Customizable variables:
 
 Following variables may be defined in your $HOME/.fac.yml to customize behavior
 
-`)
+`
+)
+
+// ParseFlags parses flags provided by the user
+func ParseFlags() {
+	// Setup custom help message
+	flag.Usage = func() {
+		fmt.Fprintf(os.Stderr, help)
 	}
 
+	showVersion := flag.Bool("version", false, "Print the version of fac being run")
 	flag.Parse()
+
+	if *showVersion {
+		fmt.Printf("fac version %s\n", version)
+		os.Exit(0)
+	}
 }
