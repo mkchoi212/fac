@@ -7,7 +7,7 @@ release:
 
 brew:
   commit_author:
-    name: Mike Choi
+    name: Mike JS. Choi
     email: mkchoi212@icloud.com
 
   github:
@@ -17,8 +17,6 @@ brew:
   folder: Formula
   homepage: "https://github.com/mkchoi212/fac"
   description: "Command line User Interface for fixing git conflicts"
-  dependencies:
-    - git
   install: bin.install "fac"
 
 builds:
