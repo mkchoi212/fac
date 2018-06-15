@@ -8,8 +8,7 @@ import (
 
 const (
 	version = "2.0"
-	help    = `
-Usage:
+	help    = `Usage:
 
    fac
 
@@ -33,7 +32,7 @@ Customizable variables:
 	quit             ...
 	help             display help in side bar
 
-Following variables may be defined in your $HOME/.fac.yml to customize behavior
+Define above variables in your $HOME/.fac.yml to customize behavior
 
 `
 )
@@ -49,7 +48,8 @@ func ParseFlags() {
 	flag.Parse()
 
 	if *showVersion {
-		fmt.Printf("fac version %s\n", version)
+		fmt.Printf("fac %s\n", version)
 		os.Exit(0)
 	}
 }
+
