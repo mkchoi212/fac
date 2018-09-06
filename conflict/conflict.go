@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/alecthomas/chroma"
@@ -95,6 +96,22 @@ func (c *Conflict) Update(incoming []string) (err error) {
 	c.IncomingLines, c.ColoredIncomingLines = updated.IncomingLines, updated.ColoredIncomingLines
 	c.LocalLines, c.ColoredLocalLines = updated.LocalLines, updated.ColoredLocalLines
 	c.LocalPureLines = updated.LocalPureLines
+	return
+}
+
+// ContextLines sets the TopPeek and BottomPeek peek values
+func (c *Conflict) SetContextLines(contextLines string) (err error) {
+	// Set context lines to show
+	peek, err := strconv.ParseInt(contextLines, 10, 32)
+	if err != nil {
+		return
+	}
+	if peek < 0 {
+		err = errors.New("Invalid context lines, expecting a positive number")
+		return
+	}
+	c.TopPeek = int(peek)
+	c.BottomPeek = int(peek)
 	return
 }
 

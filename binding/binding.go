@@ -36,6 +36,7 @@ const (
 	QuitApplication       = "quit"
 	ShowHelp              = "help"
 	ContinuousEvaluation  = "cont_eval"
+	DefaultContextLines   = "default_context_lines"
 )
 
 // defaultBinding is used when the user has not specified any of the
@@ -54,6 +55,7 @@ var defaultBinding = Binding{
 	QuitApplication:       "q",
 	ShowHelp:              "h",
 	ContinuousEvaluation:  "false",
+	DefaultContextLines:   "2",
 }
 
 // LoadSettings looks for a user specified key-binding settings file - `$HOME/.fac.yml`
