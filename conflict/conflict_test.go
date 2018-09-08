@@ -110,6 +110,30 @@ func TestEqual(t *testing.T) {
 	testhelper.Assert(t, !(c1.Equal(&c3)), "%s and %s should not be equal", c1, c2)
 }
 
+func TestSetContextLines(t *testing.T) {
+	var testCases = []struct {
+		in       string
+		expected int
+		err      bool
+	}{
+		{"2", 2, false},
+		{"0", 0, false},
+		{"-2", 0, true},
+		{"foo", 0, true},
+	}
+
+	c := Conflict{}
+
+	for _, tt := range testCases {
+		if err := c.SetContextLines(tt.in); err != nil {
+			testhelper.Assert(t, tt.err, "Didn't expect error to be returned, input: %s", tt.in)
+		}
+
+		testhelper.Assert(t, c.TopPeek == tt.expected, "TopPeek, expected: %s, returned: %s", tt.expected, c.TopPeek)
+		testhelper.Assert(t, c.BottomPeek == tt.expected, "BottomPeek, expected:  %s, returned: %s", tt.expected, c.BottomPeek)
+	}
+}
+
 func TestPaddingLines(t *testing.T) {
 	f := File{Lines: dummyFile.lines}
 	c := Conflict{
