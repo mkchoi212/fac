@@ -43,23 +43,22 @@ brew install fac
 
 The commands have been preset to the following specifications
 
+| Keybinding                      | Description          |
+| ------------------------------- | -------------------- |
+| <kbd>w</kbd>                    | show more lines up   |
+| <kbd>s</kbd>                    | show more lines down |
+| <kbd>a</kbd>                    | use local version    |
+| <kbd>d</kbd>                    | use incoming version |
+| <kbd>e</kbd>                    | manually edit code   |
+| <kbd>j</kbd>                    | scroll down          |
+| <kbd>k</kbd>                    | scroll up            |
+| <kbd>v</kbd>                    | [v]iew orientation   |
+| <kbd>n</kbd>                    | [n]ext conflict      |
+| <kbd>p</kbd>                    | [p]revious conflict  |
+| <kbd>h</kbd>, <kbd>?</kbd>      | [h]elp               |
+| <kbd>q</kbd>, <kbd>Ctrl+c</kbd> | [q]uit               |
+
 ```
-w - show more lines up
-s - show more lines down
-a - use local version
-d - use incoming version
-e - manually edit code
-
-j - scroll down
-k - scroll up
-
-v - [v]iew orientation
-n - [n]ext conflict
-p - [p]revious conflict
-
-h | ? - [h]elp
-q | Ctrl+c - [q]uit
-
 [w,a,s,d,?] >> [INPUT HERE]
 ```
 
@@ -77,4 +76,5 @@ This is an open source project so feel free to contribute by
 - Or [tweet](https://twitter.com/Bananamlkshake2) at me!
 
 ## 👮 License
+
 See [License](./LICENSE)
