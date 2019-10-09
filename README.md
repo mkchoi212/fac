@@ -33,8 +33,7 @@ $ go get github.com/mkchoi212/fac
 Or using [Homebrew 🍺](https://brew.sh)
 
 ```bash
-brew tap mkchoi212/fac https://github.com/mkchoi212/fac.git
-brew install fac
+brew install mkchoi212/fac/fac
 ```
 
 ## 🔧 Using
