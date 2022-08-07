@@ -27,7 +27,7 @@ I never really liked any of the `mergetools` out there so I made a program that 
 Execute:
 
 ```bash
-$ go get github.com/mkchoi212/fac
+$ go install github.com/mkchoi212/fac@latest
 ```
 
 Or using [Homebrew 🍺](https://brew.sh)
